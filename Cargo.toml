@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "terminal",
+    "ls",
+    "cat", "echo",
+]
