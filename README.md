@@ -37,19 +37,20 @@ This is a **Rust workspace**, where each shell command is a separate **library c
 Each command crate contains only functions (no `main()`), and is consumed inside `terminal`'s main loop.
 
 ---
-🔧 Commands to Implement
-Command	Requirements
-echo	Print args to stdout
-cd	Change directory
-ls	Support -l, -a, -F
-pwd	Print current working directory
-cat	Concatenate and display file content
-cp	Copy files
-rm	Remove files/directories (-r support)
-mv	Move or rename files
-mkdir	Create new directories
-exit	Exit the shell
+## 🔧 Commands to Implement
 
+| Command | Requirements                                |
+|---------|---------------------------------------------|
+| echo    | Print args to stdout                        |
+| cd      | Change directory                            |
+| ls      | Support `-l`, `-a`, `-F`                     |
+| pwd     | Print current working directory             |
+| cat     | Concatenate and display file content        |
+| cp      | Copy files                                  |
+| rm      | Remove files/directories (`-r` support)     |
+| mv      | Move or rename files                        |
+| mkdir   | Create new directories                      |
+| exit    | Exit the shell                              |
 ## ⚙️ Setup
 
 ### ✅ Clone the Project
