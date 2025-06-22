@@ -34,20 +34,6 @@ This project aims to build a lightweight, standalone shell inspired by tools lik
 
 This is a **Rust workspace**, where each shell command is a separate **library crate**, and the shell core logic is in a **binary crate** named `terminal`.
 
-0-shell/
-├── Cargo.toml (workspace)
-├── terminal/ # Binary crate (the shell loop)
-│ └── src/main.rs
-├── cat/ # Library crate for cat
-│ └── src/lib.rs
-├── rm/ # Library crate for rm
-├── cp/ # ...
-├── mv/
-├── echo/
-├── pwd/
-├── cd/
-├── ls/
-├── mkdir/
 Each command crate contains only functions (no `main()`), and is consumed inside `terminal`'s main loop.
 
 ---
