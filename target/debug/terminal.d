@@ -1,1 +1,1 @@
-/home/ahabchi/Desktop/0-shell/target/debug/terminal: /home/ahabchi/Desktop/0-shell/ls/src/lib.rs /home/ahabchi/Desktop/0-shell/terminal/src/main.rs
+/home/amine/project/0-shell/target/debug/terminal: /home/amine/project/0-shell/ls/src/lib.rs /home/amine/project/0-shell/mkdir/src/lib.rs /home/amine/project/0-shell/pwd/src/lib.rs /home/amine/project/0-shell/terminal/src/main.rs /home/amine/project/0-shell/terminal/src/reader.rs

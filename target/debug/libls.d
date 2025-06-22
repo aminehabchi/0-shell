@@ -1,1 +1,1 @@
-/home/ahabchi/Desktop/0-shell/target/debug/libls.rlib: /home/ahabchi/Desktop/0-shell/ls/src/lib.rs
+/home/amine/project/0-shell/target/debug/libls.rlib: /home/amine/project/0-shell/ls/src/lib.rs

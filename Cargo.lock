@@ -15,8 +15,18 @@ name = "ls"
 version = "0.1.0"
 
 [[package]]
+name = "mkdir"
+version = "0.1.0"
+
+[[package]]
+name = "pwd"
+version = "0.1.0"
+
+[[package]]
 name = "terminal"
 version = "0.1.0"
 dependencies = [
  "ls",
+ "mkdir",
+ "pwd",
 ]

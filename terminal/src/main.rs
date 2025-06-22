@@ -1,5 +1,6 @@
-use ls::*;
+mod reader;
+use reader::*;
+
 fn main() {
-    println!("Hello, world!");
-    ls();
+    main_loop();
 }

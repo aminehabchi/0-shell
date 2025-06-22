@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 ls = { path = "../ls" }
+pwd = { path = "../pwd" }
+mkdir = { path = "../mkdir" }
+cat = { path = "../cat" }
+echo = { path = "../echo" }

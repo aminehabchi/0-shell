@@ -1,1 +1,1 @@
-/home/ahabchi/Desktop/0-shell/target/debug/libecho.rlib: /home/ahabchi/Desktop/0-shell/echo/src/lib.rs
+/home/amine/project/0-shell/target/debug/libecho.rlib: /home/amine/project/0-shell/echo/src/lib.rs
