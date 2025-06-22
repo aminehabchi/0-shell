@@ -77,6 +77,8 @@ Create a library crate for your command:
 
 cargo new your-command --lib
 Cargo will auto-add your crate to the [workspace] members in Cargo.toml.
+add your library crate path to the binary crate toml dependencies
+rm = { path = "../echo" }
 
 Write your logic in src/lib.rs and expose functions like:
 

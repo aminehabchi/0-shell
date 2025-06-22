@@ -1,6 +1,7 @@
 use std::io::{ self, Write };
 use pwd::*;
 use mkdir::*;
+use rm::*;
 
 pub fn main_loop() {
     let current_dir = match pwd() {
@@ -37,13 +38,13 @@ fn select_command(input: String, current_dir: &str) {
         "pwd" => print_output("pwd", pwd()),
         "ls" => {}
         "echo" => {}
-        "rm" => {}
+        "rm" => rm(&args[1..]),
         "mkdir" => mkdir(current_dir, &args[1..]),
         "mv" => {}
         "cp" => {}
         "cd" => {}
         "exit" => {
-            println!("...... ...... .....");
+            println!("terminal exited!");
             std::process::exit(0);
         }
         _ => {
