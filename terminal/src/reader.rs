@@ -42,6 +42,10 @@ fn select_command(input: String, current_dir: &str) {
         "mv" => {}
         "cp" => {}
         "cd" => {}
+        "exit" => {
+            println!("...... ...... .....");
+            std::process::exit(0);
+        }
         _ => {
             println!("{}: command not found", args[0]);
         }

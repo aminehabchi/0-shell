@@ -26,6 +26,8 @@ version = "0.1.0"
 name = "terminal"
 version = "0.1.0"
 dependencies = [
+ "cat",
+ "echo",
  "ls",
  "mkdir",
  "pwd",
