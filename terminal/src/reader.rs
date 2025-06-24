@@ -1,7 +1,8 @@
-use std::io::{ self, Write };
-use pwd::*;
+use ls::ls;
 use mkdir::*;
+use pwd::*;
 use rm::*;
+use std::io::{self, Write};
 
 pub fn main_loop() {
     let current_dir = match pwd() {
@@ -15,10 +16,12 @@ pub fn main_loop() {
     let mut input = String::new();
 
     loop {
-        print!("{}$ ", current_dir);
+        print!("$ ");
         io::stdout().flush().unwrap();
 
-        io::stdin().read_line(&mut input).expect("Failed to read line");
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
 
         let trimmed_input = input.trim();
         if trimmed_input.is_empty() {
@@ -36,7 +39,7 @@ fn select_command(input: String, current_dir: &str) {
     let args: Vec<&str> = input.split(" ").collect();
     match args[0] {
         "pwd" => print_output("pwd", pwd()),
-        "ls" => {}
+        "ls" => ls(&args[1..], current_dir),
         "echo" => {}
         "rm" => rm(&args[1..]),
         "mkdir" => mkdir(current_dir, &args[1..]),
