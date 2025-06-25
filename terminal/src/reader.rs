@@ -4,6 +4,8 @@ use mkdir::*;
 use rm::*;
 use mv::*;
 use cp::*;
+use echo::*;
+
 
 pub fn main_loop() {
     let current_dir = match pwd() {
@@ -46,8 +48,8 @@ fn select_command(input: String, current_dir: &str) {
     let args: Vec<&str> = input.split(" ").collect();
     match args[0] {
         "pwd" => print_output("pwd", pwd()),
-        "ls" => {}
-        "echo" => {}
+        "ls" => {},
+        "echo" => println!("{}",process_escape_sequences(&args[1][1..args[1].len()-1])),
         "rm" => rm(&args[1..]),
         "mkdir" => mkdir(current_dir, &args[1..]),
         "mv" => { mv(&args[1..]) }
