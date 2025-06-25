@@ -2,7 +2,7 @@ use std::io::{ self, Write };
 use pwd::*;
 use mkdir::*;
 use rm::*;
-
+use cat::*;
 pub fn main_loop() {
     let current_dir = match pwd() {
         Ok(path) => path,
@@ -35,6 +35,7 @@ pub fn main_loop() {
 fn select_command(input: String, current_dir: &str) {
     let args: Vec<&str> = input.split(" ").collect();
     match args[0] {
+        "cat" => cat(&args[1..]) ,
         "pwd" => print_output("pwd", pwd()),
         "ls" => {}
         "echo" => {}
