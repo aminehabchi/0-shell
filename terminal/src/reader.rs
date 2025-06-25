@@ -3,6 +3,7 @@ use pwd::*;
 use mkdir::*;
 use rm::*;
 use mv::*;
+use cp::*;
 
 pub fn main_loop() {
     let current_dir = match pwd() {
@@ -50,7 +51,7 @@ fn select_command(input: String, current_dir: &str) {
         "rm" => rm(&args[1..]),
         "mkdir" => mkdir(current_dir, &args[1..]),
         "mv" => { mv(&args[1..]) }
-        "cp" => {}
+        "cp" => { cp(&args[1..]) }
         "cd" => {}
         "exit" => {
             println!("terminal exited!");
