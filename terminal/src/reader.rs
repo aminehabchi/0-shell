@@ -17,18 +17,26 @@ pub fn main_loop() {
     loop {
         print!("{}$ ", current_dir);
         io::stdout().flush().unwrap();
-
-        io::stdin().read_line(&mut input).expect("Failed to read line");
-
-        let trimmed_input = input.trim();
-        if trimmed_input.is_empty() {
-            input.clear();
-            continue;
-        }
-
-        select_command(trimmed_input.to_string(), &current_dir);
-
         input.clear();
+        let bytes_read = io::stdin().read_line(&mut input);
+
+        match bytes_read {
+            Ok(0) => {
+                println!("");
+                break;
+            }
+            Ok(_) => {
+                let trimmed_input = input.trim();
+                if trimmed_input.is_empty() {
+                    continue;
+                }
+                select_command(trimmed_input.to_string(), &current_dir);
+            }
+            Err(err) => {
+                eprintln!("Error reading input: {}", err);
+                break;
+            }
+        }
     }
 }
 
