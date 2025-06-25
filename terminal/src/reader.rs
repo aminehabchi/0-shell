@@ -2,6 +2,7 @@ use std::io::{ self, Write };
 use pwd::*;
 use mkdir::*;
 use rm::*;
+use mv::*;
 
 pub fn main_loop() {
     let current_dir = match pwd() {
@@ -48,7 +49,7 @@ fn select_command(input: String, current_dir: &str) {
         "echo" => {}
         "rm" => rm(&args[1..]),
         "mkdir" => mkdir(current_dir, &args[1..]),
-        "mv" => {}
+        "mv" => { mv(&args[1..]) }
         "cp" => {}
         "cd" => {}
         "exit" => {
@@ -56,7 +57,7 @@ fn select_command(input: String, current_dir: &str) {
             std::process::exit(0);
         }
         _ => {
-            println!("{}: command not found", args[0]);
+            println!("Command '{}' not found", args[0]);
         }
     }
 }

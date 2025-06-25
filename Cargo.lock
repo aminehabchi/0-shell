@@ -19,6 +19,10 @@ name = "mkdir"
 version = "0.1.0"
 
 [[package]]
+name = "mv"
+version = "0.1.0"
+
+[[package]]
 name = "pwd"
 version = "0.1.0"
 
@@ -34,6 +38,7 @@ dependencies = [
  "echo",
  "ls",
  "mkdir",
+ "mv",
  "pwd",
  "rm",
 ]

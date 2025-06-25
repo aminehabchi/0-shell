@@ -10,3 +10,4 @@ mkdir = { path = "../mkdir" }
 cat = { path = "../cat" }
 echo = { path = "../echo" }
 rm = { path = "../rm" }
+mv = { path = "../mv" }

@@ -2,5 +2,5 @@
 members = [
     "terminal",
     "ls",
-    "cat", "echo", "pwd", "mkdir", "rm",
+    "cat", "echo", "pwd", "mkdir", "rm", "mv",
 ]
