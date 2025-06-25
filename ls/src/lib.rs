@@ -83,3 +83,48 @@ fn check_flags(args: &[&str], file_name: OsString) -> Result<OsString, String> {
     }
     Err("flag not found, Try -l , -a or -F".to_string())
 }
+
+fn handle_l(current_dir: &str) -> io::Result<()> {
+    let curr_dir_data = fs::read_dir(&current_dir)?;
+    for data in curr_dir_data {
+        let data = data?;
+        let path = data.path();
+        let metadata = data.metadata()?;
+        let mut permissions = String::new();
+
+        if metadata.is_dir() {
+            permissions.push('d')
+        } else {
+            permissions.push('-')
+        };
+
+        if metadata.permissions().readonly() {
+            // "r--" // simple check
+            permissions.push_str("r--");
+        } else if !metadata.permissions().readonly() {
+            permissions.push_str("rw-");
+            // "rw-" // not precise, just an indicator
+        };
+
+        let size = metadata.len();
+
+        let modified = metadata.modified()?;
+        // let datetime = modified.duration_since(UNIX_EPOCH).unwrap();
+        // let seconds = datetime.as_secs();
+        let datetime: DateTime<Local> = DateTime::from(modified);
+        let formatted = datetime.format("%b %d %H:%M").to_string();
+
+        let filename = path.file_name().unwrap().to_string_lossy();
+        let mut results : Vec<Vec<String>> = vec![];
+        let mut l_results : Vec<String> = vec![];
+        l_results.push(permissions);
+        l_results.push(size.to_string());
+        l_results.push(formatted);
+        l_results.push(filename.to_string());
+        results.push(l_results);
+        results.sort();
+        // println!("{permissions} {size:>8} {formatted} {filename}");
+        println!("{:?}", results);
+    }
+    Ok(())
+}

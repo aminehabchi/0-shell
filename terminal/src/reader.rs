@@ -1,4 +1,4 @@
-use ls::ls;
+use ls::*;
 use mkdir::*;
 use pwd::*;
 use rm::*;
