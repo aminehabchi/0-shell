@@ -43,22 +43,30 @@ pub fn main_loop() {
 }
 
 fn select_command(input: String, current_dir: &str) {
-    let args: Vec<&str> = input.split(" ").collect();
-    match args[0] {
-        "pwd" => print_output("pwd", pwd()),
-        "ls" => {}
-        "echo" => {}
-        "rm" => rm(&args[1..]),
-        "mkdir" => mkdir(current_dir, &args[1..]),
-        "mv" => { mv(&args[1..]) }
-        "cp" => { cp(&args[1..]) }
-        "cd" => {}
-        "exit" => {
-            println!("terminal exited!");
-            std::process::exit(0);
-        }
-        _ => {
-            println!("Command '{}' not found", args[0]);
+    // chaining ;
+    let parts: Vec<&str> = input.split(";").collect();
+    for part in parts {
+        let args: Vec<&str> = part.split(" ").collect();
+        match args[0] {
+            "pwd" => print_output("pwd", pwd()),
+            "ls" => {}
+            "echo" => {}
+            "rm" => rm(&args[1..]),
+            "mkdir" => mkdir(current_dir, &args[1..]),
+            "mv" => {
+                mv(&args[1..]);
+            }
+            "cp" => {
+                cp(&args[1..]);
+            }
+            "cd" => {}
+            "exit" => {
+                println!("terminal exited!");
+                std::process::exit(0);
+            }
+            _ => {
+                println!("Command '{}' not found", args[0]);
+            }
         }
     }
 }
