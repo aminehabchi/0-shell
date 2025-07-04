@@ -98,7 +98,7 @@ pub fn handle_flag(current_dir: &str, flag: &str) -> io::Result<()> {
         if !filename.starts_with(".") {
             if is_l {
                 if is_dir {
-                    println!(
+                    print!(
                         "{} {} {} {}",
                         permissions,
                         size,
@@ -106,7 +106,7 @@ pub fn handle_flag(current_dir: &str, flag: &str) -> io::Result<()> {
                         colored_txt(filename.to_string())
                     );
                 } else {
-                    println!("{} {} {} {}", permissions, size, formatted, filename);
+                    print!("{} {} {} {}", permissions, size, formatted, filename);
                 }
             } else if is_f {
                 if is_dir {
