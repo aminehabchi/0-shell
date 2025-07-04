@@ -66,7 +66,7 @@ pub fn handle_flag(current_dir: &str, flag: &str) -> io::Result<()> {
                 final_filename.push_str(&filename);
 
                 //add based on type
-                if metadata.is_dir() {
+                if is_dir {
                     // read_write.push_front('d');
                     final_filename.push('/');
                     let _ = &final_filename.blue().bold();
@@ -79,34 +79,27 @@ pub fn handle_flag(current_dir: &str, flag: &str) -> io::Result<()> {
             "-a" => is_a = true,
             _ => {}
         }
-        // if metadata.is_dir() {
-        //     // read_write.push_front('d');
-        //     permissions.push('d');
-        // } else if metadata.is_symlink() {
-        //     permissions.push('l');
-        // } else {
-        //     permissions.push('-');
-        // }
         permissions.push_str(&read_write);
+        //size
         let size = metadata.len();
 
-        let modified = metadata.modified()?;
         //time
+        let modified = metadata.modified()?;
         let datetime: DateTime<Local> = DateTime::from(modified);
         let formatted = datetime.format("%b %d %H:%M").to_string();
-        // if flag == "-F" {}
+        //exclude hidden files
         if !filename.starts_with(".") {
             if is_l {
                 if is_dir {
                     print!(
-                        "{} {} {} {}",
+                        "{} {} {} {}\n",
                         permissions,
                         size,
                         formatted,
                         colored_txt(filename.to_string())
                     );
                 } else {
-                    print!("{} {} {} {}", permissions, size, formatted, filename);
+                    print!("{} {} {} {}\n", permissions, size, formatted, filename);
                 }
             } else if is_f {
                 if is_dir {
