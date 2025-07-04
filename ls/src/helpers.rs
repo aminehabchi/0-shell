@@ -69,7 +69,6 @@ pub fn handle_flag(current_dir: &str, flag: &str) -> io::Result<()> {
                 if is_dir {
                     // read_write.push_front('d');
                     final_filename.push('/');
-                    let _ = &final_filename.blue().bold();
                 } else if metadata.is_symlink() {
                     final_filename.push('@');
                 } else {
