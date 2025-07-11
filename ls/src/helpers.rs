@@ -1,4 +1,8 @@
 use colored::*;
+use users::{ get_user_by_uid, get_group_by_gid };
+use std::ffi::OsStr;
+use std::time::{ SystemTime };
+use chrono::{ DateTime, Local };
 
 #[derive(Debug, Default)]
 pub struct Flag {
@@ -21,14 +25,9 @@ impl Default for FileType {
     }
 }
 
-use std::ffi::OsStr;
-
 pub fn is_hidden(name: &OsStr) -> bool {
     name.to_string_lossy().starts_with(".")
 }
-
-use std::time::{ SystemTime };
-use chrono::{ DateTime, Local };
 
 pub fn format_date(time: &Option<SystemTime>) -> String {
     match *time {
@@ -71,4 +70,16 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
         }
         FileType::Other => format!("{}", name),
     }
+}
+
+pub fn uid_to_username(uid: u32) -> String {
+    get_user_by_uid(uid)
+        .map(|user| user.name().to_string_lossy().to_string())
+        .unwrap_or(uid.to_string())
+}
+
+pub fn gid_to_groupname(gid: u32) -> String {
+    get_group_by_gid(gid)
+        .map(|group| group.name().to_string_lossy().to_string())
+        .unwrap_or(gid.to_string())
 }

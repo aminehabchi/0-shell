@@ -91,8 +91,8 @@ impl File {
                 file_type,
                 mode,
                 hard_link,
-                self.uid,
-                self.gid,
+                uid_to_username(self.uid),
+                gid_to_groupname(self.gid),
                 size,
                 date,
                 name
