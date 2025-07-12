@@ -50,6 +50,8 @@ impl File {
                 .map(|p| p.display().to_string())
                 .unwrap_or_else(|_| "???".to_string());
             FileType::Symlink(target)
+        } else if is_executable(metadata.mode()) {
+            FileType::Executable
         } else {
             FileType::Other
         };
@@ -78,6 +80,7 @@ impl File {
                 FileType::Directory => "d".to_string(),
                 FileType::File => "-".to_string(),
                 FileType::Symlink(_) => "l".to_string(),
+                FileType::Executable => "-".to_string(),
                 FileType::Other => "?".to_string(),
             };
             let mode = mode_to_string(&self.permissions);

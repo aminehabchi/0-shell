@@ -64,16 +64,20 @@ impl Ls {
             }
             dir.sort_files_by_name();
             dir.print();
+            if !self.directorys.is_empty() {
+                println!("\n");
+            }
         }
         let l = self.directorys.len();
         for i in 0..l {
             if l > 1 {
-                println!("\n\n{}:", self.directorys[i].name);
+                if i != 0 {
+                    println!("\n");
+                }
+                println!("{}:", self.directorys[i].name);
             }
             self.directorys[i].print();
-            if i != l - 1 {
-                println!("");
-            }
+            println!("");
         }
     }
 }

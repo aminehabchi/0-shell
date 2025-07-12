@@ -12,7 +12,9 @@ pub struct Flag {
     pub f_upper: bool,
     pub l: bool,
 }
-
+pub fn is_executable(mode: u32) -> bool {
+    (mode & 0o111) != 0
+}
 pub fn is_file(name: &str) -> bool {
     Path::new(name).is_file()
 }
@@ -25,6 +27,7 @@ pub enum FileType {
     Directory,
     File,
     Symlink(String),
+    Executable,
     Other,
 }
 impl Default for FileType {
@@ -76,6 +79,11 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
             format!("{}@", name.cyan())
         } else {
             format!("{}", name.cyan())
+        }
+        FileType::Executable => if flags.f_upper {
+            format!("{}*", name.yellow().bold())
+        } else {
+            format!("{}", name.yellow().bold())
         }
         FileType::Other => format!("{}", name),
     }
