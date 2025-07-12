@@ -42,8 +42,6 @@ impl File {
 
         file.file_type = if metadata.is_dir() {
             FileType::Directory
-        } else if metadata.is_file() {
-            FileType::File
         } else if metadata.file_type().is_symlink() {
             let target = fs
                 ::read_link(&path)
@@ -52,6 +50,8 @@ impl File {
             FileType::Symlink(target)
         } else if is_executable(metadata.mode()) {
             FileType::Executable
+        } else if metadata.is_file() {
+            FileType::File
         } else {
             FileType::Other
         };
