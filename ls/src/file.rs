@@ -14,8 +14,8 @@ pub struct File {
     pub size: u64,
     pub permissions: u32,
     pub nlink: u64,
-    pub uid: u32, // owner user ID
-    pub gid: u32, // owner group ID
+    pub uid: String,
+    pub gid: String,
     pub readonly: bool,
     pub modified: Option<SystemTime>,
     pub accessed: Option<SystemTime>,
@@ -40,21 +40,7 @@ impl File {
 
         let metadata = fs::symlink_metadata(&path).unwrap();
 
-        file.file_type = if metadata.is_dir() {
-            FileType::Directory
-        } else if metadata.file_type().is_symlink() {
-            let target = fs
-                ::read_link(&path)
-                .map(|p| p.display().to_string())
-                .unwrap_or_else(|_| "???".to_string());
-            FileType::Symlink(target)
-        } else if is_executable(metadata.mode()) {
-            FileType::Executable
-        } else if metadata.is_file() {
-            FileType::File
-        } else {
-            FileType::Other
-        };
+        file.file_type = FileType::from_path(&path);
 
         /*********** check flag -l ***************/
         if !flag.l {
@@ -62,8 +48,8 @@ impl File {
         }
 
         file.permissions = metadata.mode();
-        file.uid = metadata.uid();
-        file.gid = metadata.gid();
+        file.uid = uid_to_username(metadata.uid());
+        file.gid = gid_to_groupname(metadata.gid());
         file.nlink = metadata.nlink();
         file.size = metadata.len();
         file.readonly = metadata.permissions().readonly();
@@ -74,28 +60,34 @@ impl File {
         file
     }
 
-    pub fn print(&self, flags: &Flag, max_len: &(u8, u8)) {
+    pub fn print(&self, flags: &Flag, max_len: &(u8, u8, u8, u8)) {
         if flags.l {
             let file_type = match &self.file_type {
                 FileType::Directory => "d".to_string(),
                 FileType::File => "-".to_string(),
                 FileType::Symlink(_) => "l".to_string(),
+                FileType::CharDevice => "c".to_string(),
+                FileType::BlockDevice => "b".to_string(),
+                FileType::NamedPipe => "p".to_string(),
+                FileType::Socket => "S".to_string(),
                 FileType::Executable => "-".to_string(),
-                FileType::Other => "?".to_string(),
+                FileType::Other => "-".to_string(),
             };
             let mode = mode_to_string(&self.permissions);
             let hard_link = format!("{:width$}", self.nlink, width = max_len.1 as usize);
             let size = format!("{:width$}", self.size, width = max_len.0 as usize);
             let date = format_date(&self.modified);
             let name = file_name(&self.name, &self.file_type, &flags);
+            let user_name = format!("{:<width$}", self.uid, width = max_len.2 as usize);
+            let group_name = format!("{:<width$}", self.gid, width = max_len.3 as usize);
             //print
             print!(
                 "{}{} {} {} {} {} {} {}",
                 file_type,
                 mode,
                 hard_link,
-                uid_to_username(self.uid),
-                gid_to_groupname(self.gid),
+                user_name,
+                group_name,
                 size,
                 date,
                 name

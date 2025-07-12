@@ -1,9 +1,12 @@
-use chrono::{ DateTime, Local, Utc };
 use colored::*;
 use users::{ get_user_by_uid, get_group_by_gid };
 use std::ffi::OsStr;
-use std::time::{ SystemTime };
-use std::path::Path;
+use std::path::*;
+use std::fs;
+use std::os::unix::fs::*;
+use chrono::{ DateTime, Duration, Local, TimeZone, Utc };
+use std::time::{ SystemTime, UNIX_EPOCH };
+use crate::file::File;
 
 #[derive(Debug, Default, Clone)]
 pub struct Flag {
@@ -22,14 +25,58 @@ pub fn is_dir(name: &str) -> bool {
     Path::new(name).is_dir()
 }
 
+pub fn is_char_device<P: AsRef<Path>>(path: P) -> bool {
+    if let Ok(metadata) = fs::symlink_metadata(path) {
+        metadata.file_type().is_char_device()
+    } else {
+        false
+    }
+}
+
 #[derive(PartialEq, Debug)]
 pub enum FileType {
     Directory,
     File,
-    Symlink(String),
     Executable,
+    Symlink(String),
+    CharDevice,
+    BlockDevice,
+    NamedPipe,
+    Socket,
     Other,
 }
+
+impl FileType {
+    pub fn from_path(path: &Path) -> Self {
+        let metadata = fs::symlink_metadata(path).unwrap();
+        let file_type = metadata.file_type();
+
+        if file_type.is_symlink() {
+            let target = fs::read_link(path).unwrap();
+            FileType::Symlink(target.to_string_lossy().to_string())
+        } else if file_type.is_dir() {
+            FileType::Directory
+        } else if file_type.is_file() {
+            let mode = metadata.permissions().mode();
+            if (mode & 0o111) != 0 {
+                FileType::Executable
+            } else {
+                FileType::File
+            }
+        } else if file_type.is_char_device() {
+            FileType::CharDevice
+        } else if file_type.is_block_device() {
+            FileType::BlockDevice
+        } else if file_type.is_fifo() {
+            FileType::NamedPipe
+        } else if file_type.is_socket() {
+            FileType::Socket
+        } else {
+            FileType::Other
+        }
+    }
+}
+
 impl Default for FileType {
     fn default() -> Self {
         FileType::Other
@@ -43,9 +90,19 @@ pub fn is_hidden(name: &OsStr) -> bool {
 pub fn format_date(time: &Option<SystemTime>) -> String {
     match *time {
         Some(t) => {
-            let utc: DateTime<Utc> = t.into();
-            let local = utc.with_timezone(&Local);
-            local.format("%b %d %H:%M").to_string()
+            let datetime_utc: DateTime<Utc> = t.into();
+
+            let now = Utc::now();
+
+            let diff = now.signed_duration_since(datetime_utc);
+
+            if diff > Duration::days(365) {
+                let local = datetime_utc.with_timezone(&Local);
+                local.format("%b %d  %Y").to_string()
+            } else {
+                let local = datetime_utc.with_timezone(&Local);
+                local.format("%b %d %H:%M").to_string()
+            }
         }
         None => String::from("-- -- --:--"),
     }
@@ -85,6 +142,10 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
         } else {
             format!("{}", name.yellow().bold())
         }
+        FileType::CharDevice => { format!("{}", name) }
+        FileType::BlockDevice => { format!("{}", name) }
+        FileType::NamedPipe => { format!("{}`", name) }
+        FileType::Socket => { format!("{}=", name) }
         FileType::Other => format!("{}", name),
     }
 }

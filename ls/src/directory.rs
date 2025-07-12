@@ -10,7 +10,7 @@ pub struct Directory {
     pub name: String,
     pub total: u64,
     pub files: Vec<File>,
-    pub max_len: (u8, u8), // size hlink
+    pub max_len: (u8, u8, u8, u8), // size hlink
     pub flags: Flag,
     pub is_files: bool,
 }
@@ -21,7 +21,7 @@ impl Directory {
             name: name.to_string(),
             total: 0,
             files: vec![],
-            max_len: (0, 0),
+            max_len: (0, 0, 0, 0),
             flags: flags.clone(),
             is_files: false,
         })
@@ -62,7 +62,7 @@ impl Directory {
 
     pub fn add_file_to_dir(&mut self, entry_path: &str) {
         let file = File::new(entry_path, &self.flags);
-
+        
         let block = match fs::symlink_metadata(entry_path) {
             Ok(meta) => meta.blocks(),
             Err(_) => 0,
@@ -77,6 +77,16 @@ impl Directory {
         let nlink_len = file.nlink.to_string().len() as u8;
         if nlink_len > self.max_len.1 {
             self.max_len.1 = nlink_len;
+        }
+
+        let user_name_len = file.uid.to_string().len() as u8;
+        if user_name_len > self.max_len.2 {
+            self.max_len.2 = nlink_len;
+        }
+
+         let user_name_len = file.gid.to_string().len() as u8;
+        if user_name_len > self.max_len.3 {
+            self.max_len.3 = nlink_len;
         }
 
         self.files.push(file);
