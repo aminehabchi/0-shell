@@ -1,15 +1,23 @@
+use chrono::{ DateTime, Local, Utc };
 use colored::*;
 use users::{ get_user_by_uid, get_group_by_gid };
 use std::ffi::OsStr;
 use std::time::{ SystemTime };
-use chrono::{ DateTime, Local };
+use std::path::Path;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Flag {
     pub a: bool,
     pub a_upper: bool,
     pub f_upper: bool,
     pub l: bool,
+}
+
+pub fn is_file(name: &str) -> bool {
+    Path::new(name).is_file()
+}
+pub fn is_dir(name: &str) -> bool {
+    Path::new(name).is_dir()
 }
 
 #[derive(PartialEq, Debug)]
@@ -32,8 +40,9 @@ pub fn is_hidden(name: &OsStr) -> bool {
 pub fn format_date(time: &Option<SystemTime>) -> String {
     match *time {
         Some(t) => {
-            let datetime: DateTime<Local> = DateTime::<Local>::from(t);
-            datetime.format("%b %d %H:%M").to_string()
+            let utc: DateTime<Utc> = t.into();
+            let local = utc.with_timezone(&Local);
+            local.format("%b %d %H:%M").to_string()
         }
         None => String::from("-- -- --:--"),
     }
@@ -56,9 +65,9 @@ pub fn mode_to_string(mode: &u32) -> String {
 pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
     match file_type {
         FileType::Directory => if flags.f_upper {
-            format!("{}/", name.blue())
+            format!("{}/", name.blue().bold())
         } else {
-            format!("{}", name.blue())
+            format!("{}", name.blue().bold())
         }
         FileType::File => format!("{}", name),
         FileType::Symlink(target) => if flags.l {
@@ -82,4 +91,8 @@ pub fn gid_to_groupname(gid: u32) -> String {
     get_group_by_gid(gid)
         .map(|group| group.name().to_string_lossy().to_string())
         .unwrap_or(gid.to_string())
+}
+
+pub fn remove_leading_dot(name: &str) -> String {
+    name.strip_prefix('.').unwrap_or(name).to_string()
 }
