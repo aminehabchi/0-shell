@@ -8,6 +8,16 @@ use chrono::{ DateTime, Duration, Local, TimeZone, Utc };
 use std::time::{ SystemTime, UNIX_EPOCH };
 use crate::file::File;
 
+/// Extract major device number
+pub fn major(dev: u64) -> u64 {
+    (dev >> 8) & 0xfff
+}
+
+/// Extract minor device number
+pub fn minor(dev: u64) -> u64 {
+    (dev & 0xff) | ((dev >> 12) & 0xfff00)
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct Flag {
     pub a: bool,
