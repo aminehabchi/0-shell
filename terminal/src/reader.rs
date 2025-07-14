@@ -3,6 +3,7 @@ use pwd::*;
 use mkdir::*;
 use rm::*;
 use cat::*;
+use colored::*;
 pub fn main_loop() {
     let current_dir = match pwd() {
         Ok(path) => path,
@@ -15,7 +16,7 @@ pub fn main_loop() {
     let mut input = String::new();
 
     loop {
-        print!("{}$ ", current_dir);
+        print!("{}$ ", current_dir.blue().bold());
         io::stdout().flush().unwrap();
 
         io::stdin().read_line(&mut input).expect("Failed to read line");
@@ -49,7 +50,8 @@ fn select_command(input: String, current_dir: &str) {
             std::process::exit(0);
         }
         _ => {
-            println!("{}: command not found", args[0]);
+            let cmdnotfound = "Command Not Found!";
+            println!("{}: {}", args[0].red().bold(),cmdnotfound.red().bold());
         }
     }
 }
