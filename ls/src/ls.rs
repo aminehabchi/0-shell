@@ -55,7 +55,7 @@ impl Ls {
                 name: "".to_string(),
                 total: 0,
                 files: vec![],
-                max_len: (0, 0, 0, 0),
+                max_len: ((0, 0, 0), 0, 0, 0),
                 flags: self.flags.clone(),
                 is_files: true,
             };

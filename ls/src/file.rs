@@ -12,6 +12,9 @@ pub struct File {
     pub path: PathBuf,
     pub file_type: FileType,
     pub size: u64,
+    pub rdev: u64,
+    pub major: u64,
+    pub minor: u64,
     pub permissions: u32,
     pub nlink: u64,
     pub uid: String,
@@ -56,11 +59,13 @@ impl File {
         file.modified = metadata.modified().ok();
         file.accessed = metadata.accessed().ok();
         file.created = metadata.created().ok();
-
+        file.rdev = metadata.rdev();
+        file.major = major(file.rdev);
+        file.minor = minor(file.rdev);
         file
     }
 
-    pub fn print(&self, flags: &Flag, max_len: &(u8, u8, u8, u8)) {
+    pub fn print(&self, flags: &Flag, max_len: &((u8, u8, u8), u8, u8, u8)) {
         if flags.l {
             let file_type = match &self.file_type {
                 FileType::Directory => "d".to_string(),
@@ -75,7 +80,21 @@ impl File {
             };
             let mode = mode_to_string(&self.permissions);
             let hard_link = format!("{:width$}", self.nlink, width = max_len.1 as usize);
-            let size = format!("{:width$}", self.size, width = max_len.0 as usize);
+            let size = match &self.file_type {
+                FileType::CharDevice | FileType::BlockDevice => {
+                    // max_len.0.1 → width for major
+                    // max_len.0.2 → width for minor
+                    format!(
+                        "{:>major_width$}, {:>minor_width$}",
+                        self.major,
+                        self.minor,
+                        major_width = max_len.0.1 as usize,
+                        minor_width = max_len.0.2 as usize
+                    )
+                }
+                _ => format!("{:>width$}", self.size, width = max_len.0.0 as usize),
+            };
+
             let date = format_date(&self.modified);
             let name = file_name(&self.name, &self.file_type, &flags);
             let user_name = format!("{:<width$}", self.uid, width = max_len.2 as usize);

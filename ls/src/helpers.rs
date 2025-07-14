@@ -25,22 +25,12 @@ pub struct Flag {
     pub f_upper: bool,
     pub l: bool,
 }
-pub fn is_executable(mode: u32) -> bool {
-    (mode & 0o111) != 0
-}
+
 pub fn is_file(name: &str) -> bool {
     Path::new(name).is_file()
 }
 pub fn is_dir(name: &str) -> bool {
     Path::new(name).is_dir()
-}
-
-pub fn is_char_device<P: AsRef<Path>>(path: P) -> bool {
-    if let Ok(metadata) = fs::symlink_metadata(path) {
-        metadata.file_type().is_char_device()
-    } else {
-        false
-    }
 }
 
 #[derive(PartialEq, Debug)]
@@ -131,32 +121,55 @@ pub fn mode_to_string(mode: &u32) -> String {
 
     result
 }
-
+use crate::file::File;
 pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
     match file_type {
-        FileType::Directory => if flags.f_upper {
-            format!("{}/", name.blue().bold())
-        } else {
-            format!("{}", name.blue().bold())
+        FileType::Directory => {
+            if flags.f_upper {
+                format!("{}/", name.blue().bold())
+            } else {
+                name.blue().bold().to_string()
+            }
         }
-        FileType::File => format!("{}", name),
-        FileType::Symlink(target) => if flags.l {
-            format!("{} -> {}", name.cyan(), target)
-        } else if flags.f_upper {
-            format!("{}@", name.cyan())
-        } else {
-            format!("{}", name.cyan())
+
+        FileType::File => name.to_string(),
+
+        FileType::Symlink(target) => {
+            if flags.l {
+                let p = Path::new(target);
+                if !p.exists() {
+                    // broken link
+                    format!("{} -> {}", name.cyan(), target.underline())
+                } else {
+                    // resolve type of target and apply coloring
+                    let fake_flag = Flag::default();
+                    let t = File::new(p, &fake_flag);
+                    format!("{} -> {}", name.cyan(), file_name(&target, &t.file_type, &fake_flag))
+                }
+            } else if flags.f_upper {
+                format!("{}@", name.cyan())
+            } else {
+                name.cyan().to_string()
+            }
         }
-        FileType::Executable => if flags.f_upper {
-            format!("{}*", name.yellow().bold())
-        } else {
-            format!("{}", name.yellow().bold())
+
+        FileType::Executable => {
+            if flags.f_upper {
+                format!("{}*", name.yellow().bold())
+            } else {
+                name.yellow().bold().to_string()
+            }
         }
-        FileType::CharDevice => { format!("{}", name) }
-        FileType::BlockDevice => { format!("{}", name) }
-        FileType::NamedPipe => { format!("{}`", name) }
-        FileType::Socket => { format!("{}=", name) }
-        FileType::Other => format!("{}", name),
+
+        FileType::CharDevice => name.magenta().to_string(),
+
+        FileType::BlockDevice => name.magenta().to_string(),
+
+        FileType::NamedPipe => format!("{}`", name),
+
+        FileType::Socket => format!("{}=", name),
+
+        FileType::Other => name.to_string(),
     }
 }
 

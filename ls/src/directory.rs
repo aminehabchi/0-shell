@@ -4,13 +4,14 @@ use std::fs;
 use crate::file::File;
 use crate::helpers::*;
 use std::os::unix::fs::MetadataExt;
+
 //
 #[derive(Debug, Default)]
 pub struct Directory {
     pub name: String,
     pub total: u64,
     pub files: Vec<File>,
-    pub max_len: (u8, u8, u8, u8), // size hlink
+    pub max_len: ((u8, u8, u8), u8, u8, u8),
     pub flags: Flag,
     pub is_files: bool,
 }
@@ -21,7 +22,7 @@ impl Directory {
             name: name.to_string(),
             total: 0,
             files: vec![],
-            max_len: (0, 0, 0, 0),
+            max_len: ((0, 0, 0), 0, 0, 0),
             flags: flags.clone(),
             is_files: false,
         })
@@ -62,16 +63,30 @@ impl Directory {
 
     pub fn add_file_to_dir(&mut self, entry_path: &str) {
         let file = File::new(entry_path, &self.flags);
-        
-        let block = match fs::symlink_metadata(entry_path) {
-            Ok(meta) => meta.blocks(),
-            Err(_) => 0,
-        };
-        self.total += block;
 
-        let size_len = file.size.to_string().len() as u8;
-        if size_len > self.max_len.0 {
-            self.max_len.0 = size_len;
+        if self.flags.l {
+            if let Ok(metadata) = fs::symlink_metadata(entry_path) {
+                self.total += metadata.blocks();
+            }
+        }
+
+        if file.file_type == FileType::CharDevice || file.file_type == FileType::BlockDevice {
+            let major_len = file.major.to_string().len() as u8;
+            let minor_len = file.minor.to_string().len() as u8;
+            if major_len > self.max_len.0.1 {
+                self.max_len.0.1 = major_len;
+            }
+            if minor_len > self.max_len.0.2 {
+                self.max_len.0.2 = minor_len;
+            }
+            if major_len + minor_len + 2 > self.max_len.0.0 {
+                self.max_len.0.0 = major_len + minor_len + 2;
+            }
+        } else {
+            let size_len = file.size.to_string().len() as u8;
+            if size_len > self.max_len.0.0 {
+                self.max_len.0.0 = size_len;
+            }
         }
 
         let nlink_len = file.nlink.to_string().len() as u8;
@@ -81,16 +96,17 @@ impl Directory {
 
         let user_name_len = file.uid.to_string().len() as u8;
         if user_name_len > self.max_len.2 {
-            self.max_len.2 = nlink_len;
+            self.max_len.2 = user_name_len;
         }
 
-         let user_name_len = file.gid.to_string().len() as u8;
-        if user_name_len > self.max_len.3 {
-            self.max_len.3 = nlink_len;
+        let group_name_len = file.gid.to_string().len() as u8;
+        if group_name_len > self.max_len.3 {
+            self.max_len.3 = group_name_len;
         }
 
         self.files.push(file);
     }
+
     pub fn print(&self) {
         if self.flags.l && !self.is_files {
             println!("total {}", self.total / 2);
@@ -107,6 +123,7 @@ impl Directory {
             }
         }
     }
+
     pub fn sort_files_by_name(&mut self) {
         self.files.sort_by(|a, b|
             remove_leading_dot(&a.name.to_lowercase()).cmp(
