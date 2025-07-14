@@ -121,55 +121,70 @@ pub fn mode_to_string(mode: &u32) -> String {
 
     result
 }
+pub fn is_alphanumeric_or_special(s: &str) -> bool {
+    s.chars().all(|c| { c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' })
+}
+
 use crate::file::File;
 pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
+    // Check if raw name needs quoting
+    let needs_quote = !is_alphanumeric_or_special(name);
+
+    // Quote raw name if needed (handle single quote inside name)
+    let quoted_name = if needs_quote {
+        if name.contains('\'') { format!("\"{}\"", name) } else { format!("'{}'", name) }
+    } else {
+        name.to_string()
+    };
+
+    // Now apply coloring/suffixes to the quoted or unquoted name (the string with quotes if any)
     match file_type {
         FileType::Directory => {
             if flags.f_upper {
-                format!("{}/", name.blue().bold())
+                format!("{}/", quoted_name.blue().bold())
             } else {
-                name.blue().bold().to_string()
+                quoted_name.blue().bold().to_string()
             }
         }
 
-        FileType::File => name.to_string(),
+        FileType::File => quoted_name,
 
         FileType::Symlink(target) => {
             if flags.l {
                 let p = Path::new(target);
                 if !p.exists() {
-                    // broken link
-                    format!("{} -> {}", name.cyan(), target.underline())
+                    format!("{} -> {}", quoted_name.cyan(), target.underline())
                 } else {
-                    // resolve type of target and apply coloring
                     let fake_flag = Flag::default();
                     let t = File::new(p, &fake_flag);
-                    format!("{} -> {}", name.cyan(), file_name(&target, &t.file_type, &fake_flag))
+                    format!(
+                        "{} -> {}",
+                        quoted_name.cyan(),
+                        file_name(&target, &t.file_type, &fake_flag)
+                    )
                 }
             } else if flags.f_upper {
-                format!("{}@", name.cyan())
+                format!("{}@", quoted_name.cyan())
             } else {
-                name.cyan().to_string()
+                quoted_name.cyan().to_string()
             }
         }
 
         FileType::Executable => {
             if flags.f_upper {
-                format!("{}*", name.yellow().bold())
+                format!("{}*", quoted_name.yellow().bold())
             } else {
-                name.yellow().bold().to_string()
+                quoted_name.yellow().bold().to_string()
             }
         }
 
-        FileType::CharDevice => name.magenta().to_string(),
+        FileType::CharDevice | FileType::BlockDevice => quoted_name.magenta().to_string(),
 
-        FileType::BlockDevice => name.magenta().to_string(),
+        FileType::NamedPipe => format!("{}`", quoted_name),
 
-        FileType::NamedPipe => format!("{}`", name),
+        FileType::Socket => format!("{}=", quoted_name),
 
-        FileType::Socket => format!("{}=", name),
-
-        FileType::Other => name.to_string(),
+        FileType::Other => quoted_name,
     }
 }
 
@@ -185,6 +200,7 @@ pub fn gid_to_groupname(gid: u32) -> String {
         .unwrap_or(gid.to_string())
 }
 
-pub fn remove_leading_dot(name: &str) -> String {
-    name.strip_prefix('.').unwrap_or(name).to_string()
+pub fn remove_special_char(name: &str) -> String {
+    let name = name.strip_prefix('.').unwrap_or(name).to_string();
+    // remove from name -.
 }

@@ -37,7 +37,8 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
             clear_screen();
         }
         _ => {
-            println!("Command '{}' not found", args[0]);
+
+            println!("Command '{}' not found", parts[0]);
         }
     }
 }

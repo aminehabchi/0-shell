@@ -126,8 +126,8 @@ impl Directory {
 
     pub fn sort_files_by_name(&mut self) {
         self.files.sort_by(|a, b|
-            remove_leading_dot(&a.name.to_lowercase()).cmp(
-                &remove_leading_dot(&b.name.to_lowercase())
+            remove_special_char(&a.name.to_lowercase()).cmp(
+                &remove_special_char(&b.name.to_lowercase())
             )
         );
     }

@@ -15,7 +15,7 @@ pub fn main_loop() {
     let mut input = String::new();
 
     loop {
-        print!("{}$ ", current_dir.green().bold());
+        print!("~{}$ ", current_dir.green().bold());
         io::stdout().flush().unwrap();
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
@@ -24,7 +24,7 @@ pub fn main_loop() {
             Ok(0) => {
                 // Ctrl + D
                 println!("");
-                break;
+                std::process::exit(0);
             }
             Ok(_) => {
                 let trimmed_input = input.trim();
