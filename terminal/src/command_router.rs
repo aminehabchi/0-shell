@@ -4,6 +4,7 @@ use rm::*;
 use mv::*;
 use cp::*;
 use ls::*;
+use echo::*;
 
 pub fn router(parts: Vec<String>, current_dir: &String) {
     if parts.is_empty() {
@@ -19,7 +20,7 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "pwd" => print_output("pwd", pwd()),
         "ls" => ls(&args),
 
-        "echo" => {}
+        "echo" => echo(&args),
         "rm" => rm(&args),
         "mkdir" => mkdir(&current_dir, &args),
         "mv" => {
@@ -37,7 +38,6 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
             clear_screen();
         }
         _ => {
-
             println!("Command '{}' not found", parts[0]);
         }
     }

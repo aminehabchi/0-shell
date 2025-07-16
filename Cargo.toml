@@ -1,6 +1,6 @@
 [workspace]
+resolver = "3"
 members = [
     "terminal",
-    "ls",
-    "cat", "echo", "pwd", "mkdir", "rm", "mv", "cp",
+    "ls","cat", "echo", "pwd", "mkdir", "rm", "mv", "cp",
 ]

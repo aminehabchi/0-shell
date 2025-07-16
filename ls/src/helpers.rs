@@ -203,4 +203,5 @@ pub fn gid_to_groupname(gid: u32) -> String {
 pub fn remove_special_char(name: &str) -> String {
     let name = name.strip_prefix('.').unwrap_or(name).to_string();
     // remove from name -.
+    name
 }
