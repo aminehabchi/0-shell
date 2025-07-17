@@ -48,7 +48,7 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
 
         let mut new_input = String::new();
         io::stdin().read_line(&mut new_input).unwrap();
-
+        new_input.push('\n');
         split_input(new_input, parts, open_quote);
     }
 }
