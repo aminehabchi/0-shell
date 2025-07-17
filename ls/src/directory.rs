@@ -1,10 +1,10 @@
 use std::path::Path;
 use std::fs;
+use std::os::unix::fs::MetadataExt;
 //
 use crate::file::File;
 use crate::helpers::*;
-use std::os::unix::fs::MetadataExt;
-
+use crate::file_helpers::FileType;
 //
 #[derive(Debug, Default)]
 pub struct Directory {
@@ -40,11 +40,11 @@ impl Directory {
 
         // Create a fresh path reference for the read_dir call
         for entry_result in fs::read_dir(&self.name).unwrap() {
-            let entry = match entry_result {
+            let entries = match fs::read_dir(&self.name) {
                 Ok(e) => e,
                 Err(err) => {
-                    println!("{}", err);
-                    continue;
+                    eprintln!("Cannot read directory {}: {}", self.name, err);
+                    return;
                 }
             };
 

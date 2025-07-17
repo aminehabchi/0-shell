@@ -40,9 +40,14 @@ impl File {
             }
         };
 
-        let metadata = fs::symlink_metadata(&path).unwrap();
-
         file.file_type = FileType::from_path(&path);
+
+        let metadata = match fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(_) => {
+                return file;
+            }
+        };
 
         /*********** check flag -l ***************/
         if !flag.l {

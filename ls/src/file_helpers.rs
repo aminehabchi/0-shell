@@ -1,11 +1,68 @@
 use crate::file::File;
-use crate::helpers::FileType;
 use colored::*;
 use users::{ get_user_by_uid, get_group_by_gid };
-use std::path::*;
 use std::process::Command;
+use std::fs;
+use std::os::unix::fs::*;
+use std::path::*;
 
 use crate::helpers::*;
+
+#[derive(PartialEq, Debug)]
+pub enum FileType {
+    Directory,
+    File,
+    Executable,
+    Symlink(PathBuf),
+    CharDevice,
+    BlockDevice,
+    NamedPipe,
+    Socket,
+    Other,
+}
+
+impl FileType {
+    pub fn from_path(path: &Path) -> Self {
+        let metadata = match fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(_) => {
+                return FileType::File;
+            }
+        };
+
+        let file_type = metadata.file_type();
+
+        if file_type.is_symlink() {
+            let target = fs::read_link(path).unwrap();
+            FileType::Symlink(target)
+        } else if file_type.is_dir() {
+            FileType::Directory
+        } else if file_type.is_file() {
+            let mode = metadata.permissions().mode();
+            if (mode & 0o111) != 0 {
+                FileType::Executable
+            } else {
+                FileType::File
+            }
+        } else if file_type.is_char_device() {
+            FileType::CharDevice
+        } else if file_type.is_block_device() {
+            FileType::BlockDevice
+        } else if file_type.is_fifo() {
+            FileType::NamedPipe
+        } else if file_type.is_socket() {
+            FileType::Socket
+        } else {
+            FileType::Other
+        }
+    }
+}
+
+impl Default for FileType {
+    fn default() -> Self {
+        FileType::Other
+    }
+}
 
 pub fn file_type(file_type: &FileType) -> char {
     match file_type {
@@ -46,14 +103,12 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
     // Check if raw name needs quoting
     let needs_quote = !is_alphanumeric_or_special(name);
 
-    // Quote raw name if needed (handle single quote inside name)
     let quoted_name = if needs_quote {
         if name.contains('\'') { format!("\"{}\"", name) } else { format!("'{}'", name) }
     } else {
         name.to_string()
     };
 
-    // Now apply coloring/suffixes to the quoted or unquoted name (the string with quotes if any)
     match file_type {
         FileType::Directory => {
             if flags.f_upper {
@@ -67,18 +122,13 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
 
         FileType::Symlink(target) => {
             if flags.l {
-                let p = Path::new(target);
-                if !p.exists() {
-                    format!("{} -> {}", quoted_name.cyan(), target.underline())
-                } else {
-                    let fake_flag = Flag::default();
-                    let t = File::new(p, &fake_flag);
-                    format!(
-                        "{} -> {}",
-                        quoted_name.cyan(),
-                        file_name(&target, &t.file_type, &fake_flag)
-                    )
-                }
+                let fake_flag = flags.clone();
+                let t = File::new(target.as_path(), &fake_flag);
+                format!(
+                    "{} -> {}",
+                    quoted_name.cyan(),
+                    file_name(&t.name, &t.file_type, &fake_flag)
+                )
             } else if flags.f_upper {
                 format!("{}@", quoted_name.cyan())
             } else {
@@ -88,13 +138,13 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
 
         FileType::Executable => {
             if flags.f_upper {
-                format!("{}*", quoted_name.yellow().bold())
+                format!("{}*", quoted_name.green().bold())
             } else {
-                quoted_name.yellow().bold().to_string()
+                quoted_name.green().bold().to_string()
             }
         }
 
-        FileType::CharDevice | FileType::BlockDevice => quoted_name.magenta().to_string(),
+        FileType::CharDevice | FileType::BlockDevice => quoted_name.yellow().bold().to_string(),
 
         FileType::NamedPipe => format!("{}`", quoted_name),
 
