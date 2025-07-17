@@ -68,6 +68,7 @@ impl Ls {
                 println!("\n");
             }
         }
+
         let l = self.directorys.len();
         for i in 0..l {
             if l > 1 {
