@@ -6,7 +6,7 @@ use std::fs;
 use std::os::unix::fs::*;
 use chrono::{ DateTime, Duration, Local, Utc };
 use std::time::{ SystemTime };
-// use crate::file::File;
+use std::process::Command;
 
 /// Extract major device number
 pub fn major(dev: u64) -> u64 {
@@ -108,7 +108,7 @@ pub fn format_date(time: &Option<SystemTime>) -> String {
     }
 }
 
-pub fn mode_to_string(mode: &u32) -> String {
+pub fn mode_to_string(mode: &u32, path: &str) -> String {
     let mut result = String::new();
 
     let permissions = [(mode >> 6) & 0o7, (mode >> 3) & 0o7, mode & 0o7];
@@ -119,10 +119,16 @@ pub fn mode_to_string(mode: &u32) -> String {
         result.push(if (perm & 0b001) != 0 { 'x' } else { '-' });
     }
 
+    if check_acl(path) {
+        result.push('+');
+    } else {
+        result.push(' ');
+    }
+
     result
 }
 pub fn is_alphanumeric_or_special(s: &str) -> bool {
-    s.chars().all(|c| { c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' })
+    s.chars().all(|c| { c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' || c == '/' })
 }
 
 use crate::file::File;
@@ -204,4 +210,25 @@ pub fn remove_special_char(name: &str) -> String {
     let name = name.strip_prefix('.').unwrap_or(name).to_string();
     // remove from name -.
     name
+}
+
+pub fn check_acl(path: &str) -> bool {
+    let output = Command::new("getfacl").arg(path).output().expect("failed to execute getfacl");
+
+    if !output.status.success() {
+        return false;
+    }
+
+    let acl_text = String::from_utf8_lossy(&output.stdout);
+
+    // Basic entries that always appear
+    let basic_entries = ["user::", "group::", "other::"];
+
+    // If any line does NOT start with these, it indicates extended ACL
+    acl_text.lines().any(|line| {
+        !basic_entries.iter().any(|prefix| line.starts_with(prefix)) &&
+            !line.trim().is_empty() &&
+            !line.starts_with('#') && // skip comments
+            !line.starts_with("mask::") // mask is also standard in ACLs
+    })
 }

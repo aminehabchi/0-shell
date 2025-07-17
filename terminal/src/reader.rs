@@ -1,4 +1,4 @@
-use std::process::Command;
+// use std::process::Command;
 use std::io::{ self, Write };
 use colored::*;
 use pwd::*;
@@ -53,13 +53,14 @@ pub fn main_loop() {
 }
 
 fn get_current_branch() -> String {
-    let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
+    return String::new();
+    // let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
 
-    match output {
-        Ok(output) if output.status.success() => {
-            let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!(" git:({})", branch.red().bold())
-        }
-        _ => String::new(),
-    }
+    // match output {
+    //     Ok(output) if output.status.success() => {
+    //         let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    //         format!(" git:({})", branch.red().bold())
+    //     }
+    //     _ => String::new(),
+    // }
 }

@@ -78,7 +78,7 @@ impl File {
                 FileType::Executable => "-".to_string(),
                 FileType::Other => "-".to_string(),
             };
-            let mode = mode_to_string(&self.permissions);
+            let mode = mode_to_string(&self.permissions,&self.path.to_string_lossy());
             let hard_link = format!("{:width$}", self.nlink, width = max_len.1 as usize);
             let size = match &self.file_type {
                 FileType::CharDevice | FileType::BlockDevice => {
