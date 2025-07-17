@@ -40,11 +40,11 @@ impl Directory {
 
         // Create a fresh path reference for the read_dir call
         for entry_result in fs::read_dir(&self.name).unwrap() {
-            let entries = match fs::read_dir(&self.name) {
+            let entry = match entry_result {
                 Ok(e) => e,
                 Err(err) => {
-                    eprintln!("Cannot read directory {}: {}", self.name, err);
-                    return;
+                    println!("{}", err);
+                    continue;
                 }
             };
 
