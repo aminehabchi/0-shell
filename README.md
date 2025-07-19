@@ -4,13 +4,13 @@ A minimalist Unix-like shell built in **Rust** — no `bash`, no `sh`, just pure
 
 ---
 
-## 📖 About This Project
+## About This Project
 
 **0-Shell** is a lightweight, standalone shell inspired by tools like **BusyBox**, built for embedded Linux environments. It uses **Rust** to implement core shell commands **from scratch**, without relying on external programs.
 
 ---
 
-## 🎯 What You’ll Build
+## What You’ll Build
 
 A fully working shell that:
 
@@ -22,7 +22,7 @@ A fully working shell that:
 
 ---
 
-## 🧠 What You’ll Learn
+## What You’ll Learn
 
 - How to use Rust’s standard and low-level system libraries
 - How to write your own versions of Unix commands
@@ -30,7 +30,7 @@ A fully working shell that:
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 
 This is a **Rust workspace**:
 
@@ -40,7 +40,7 @@ This is a **Rust workspace**:
 
 ---
 
-## 🧰 Built-In Commands
+## Built-In Commands
 
 | Command | Description                              |
 |---------|------------------------------------------|
@@ -59,7 +59,7 @@ This is a **Rust workspace**:
 
 ## ⚙️ Getting Started
 
-### ✅ Clone the Repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/aminehabchi/0-shell
@@ -68,7 +68,7 @@ cargo run -p terminal
 ```
 
 ---
-## 👥 Team Members & Responsibilities
+## Team Members & Responsibilities
 
 | Name                  | Assigned Commands           |
 |-----------------------|-----------------------------|
@@ -77,6 +77,6 @@ cargo run -p terminal
 | **Abdelouahab Bouchik** | `cd`, `echo`              |
 ---
 
-## 🙏 Special Thanks
+## Special Thanks
 
 Thanks to [@aminehabchi](https://github.com/aminehabchi) for setting up the workspace and kicking off the project.
