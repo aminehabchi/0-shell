@@ -1,4 +1,4 @@
-# 🐚 0-Shell
+# 0-Shell
 
 A minimalist Unix-like shell built in **Rust** — no `bash`, no `sh`, just pure system-level control.
 
@@ -25,7 +25,6 @@ A fully working shell that:
 ## 🧠 What You’ll Learn
 
 - How to use Rust’s standard and low-level system libraries
-- How to work with Unix system calls (like `fork`, `exec`, etc.)
 - How to write your own versions of Unix commands
 - How to build a modular command-execution loop
 
