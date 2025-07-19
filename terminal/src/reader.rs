@@ -26,7 +26,7 @@ pub fn main_loop() {
     let mut input = String::new();
     println!("{}\n", ASCII.blue());
     loop {
-        print!("~{}{}$ ", current_dir.green().bold(), get_current_branch());
+        print!("~{}{}$ ", current_dir.blue().bold(), get_current_branch());
         io::stdout().flush().unwrap();
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
