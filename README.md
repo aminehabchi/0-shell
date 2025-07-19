@@ -1,106 +1,83 @@
 # 🐚 0-Shell
 
-A minimalist Unix-like shell written in **Rust**, built from scratch to replicate essential Unix commands without relying on external binaries like `bash` or `sh`.
+A minimalist Unix-like shell built in **Rust** — no `bash`, no `sh`, just pure system-level control.
 
 ---
 
-## 📖 Overview
+## 📖 About This Project
 
-This project aims to build a lightweight, standalone shell inspired by tools like **BusyBox**, tailored for embedded Linux environments. You’ll implement core shell commands directly using **Rust’s system-level capabilities**, including file handling, process management, and error handling.
-
----
-
-## 🎯 Objectives
-
-- Master file and directory manipulation using Rust's standard and low-level libraries.
-- Build a working shell that:
-  - Displays a prompt (`$`)
-  - Accepts and parses input
-  - Executes commands and returns to prompt after execution
-  - Exits gracefully on `exit` command or `Ctrl+D`
+**0-Shell** is a lightweight, standalone shell inspired by tools like **BusyBox**, built for embedded Linux environments. It uses **Rust** to implement core shell commands **from scratch**, without relying on external programs.
 
 ---
 
-## 🧠 Learning Goals
+## 🎯 What You’ll Build
 
-- Use Unix syscalls and Rust's abstractions safely
-- Implement custom shell commands from scratch
-- Create and manage a command execution loop
-- Handle error states and invalid input robustly
+A fully working shell that:
+
+- Displays a prompt like `$`
+- Accepts and parses user input
+- Executes built-in commands
+- Handles errors gracefully
+- Exits on `exit` or `Ctrl+D`
+
+---
+
+## 🧠 What You’ll Learn
+
+- How to use Rust’s standard and low-level system libraries
+- How to work with Unix system calls (like `fork`, `exec`, etc.)
+- How to write your own versions of Unix commands
+- How to build a modular command-execution loop
 
 ---
 
-## 🗃️ Project Structure
+## 🗂 Project Structure
 
-This is a **Rust workspace**, where each shell command is a separate **library crate**, and the shell core logic is in a **binary crate** named `terminal`.
+This is a **Rust workspace**:
 
-Each command crate contains only functions (no `main()`), and is consumed inside `terminal`'s main loop.
+- Each shell command is its own **library crate** (like `cat`, `rm`, `cd`, etc.)
+- The main shell logic is in a binary crate called `terminal`
+- The `terminal` crate imports and uses the command crates
 
 ---
-## 🔧 Commands to Implement
 
-| Command | Requirements                                |
-|---------|---------------------------------------------|
-| echo    | Print args to stdout                        |
-| cd      | Change directory                            |
-| ls      | Support `-l`, `-a`, `-F`                     |
-| pwd     | Print current working directory             |
-| cat     | Concatenate and display file content        |
-| cp      | Copy files                                  |
-| rm      | Remove files/directories (`-r` support)     |
-| mv      | Move or rename files                        |
-| mkdir   | Create new directories                      |
-| exit    | Exit the shell                              |
-## ⚙️ Setup
+## 🧰 Built-In Commands
 
-### ✅ Clone the Project
+| Command | Description                              |
+|---------|------------------------------------------|
+| `echo`  | Print text to stdout                     |
+| `cd`    | Change the current working directory     |
+| `ls`    | List directory contents (`-l`, `-a`, `-F`) |
+| `pwd`   | Show the current working directory       |
+| `cat`   | Display file contents                    |
+| `cp`    | Copy files                               |
+| `rm`    | Remove files or directories (`-r` flag)  |
+| `mv`    | Move or rename files                     |
+| `mkdir` | Create directories                       |
+| `exit`  | Exit the shell                           |
+
+---
+
+## ⚙️ Getting Started
+
+### ✅ Clone the Repository
 
 ```bash
 git clone https://github.com/aminehabchi/0-shell
 cd 0-shell
-
-✅ Run the Shell
 cargo run -p terminal
-🧪 Running a Single Command
+```
 
-Each command crate (like cat, pwd) is a library. You cannot run them directly, but they are invoked from terminal.
+---
+## 👥 Team Members & Responsibilities
 
+| Name                  | Assigned Commands           |
+|-----------------------|-----------------------------|
+| **Ali Louhab**        | `cat`, `rm`, `exit`, `mkdir` |
+| **Amine Habchi**      | `mv`, `cp`, `pwd`, `ls`     |
+| **Abdelouahab Bouchik** | `cd`, `echo`              |
+---
 
-👥 Team Tasks
-AliLouhab cat, rm , exit ,mkdir
-AmineHabchi	mv, cp , pwd , ls
-AbdelouahabBouchik	cd, echo
+## 🙏 Special Thanks
 
-🚀 Workflow Instructions
-Create a library crate for your command:
-
-cargo new your-command --lib
-Cargo will auto-add your crate to the [workspace] members in Cargo.toml.
-add your library crate path to the binary crate toml dependencies
-rm = { path = "../echo" }
-
-Write your logic in src/lib.rs and expose functions like:
-
-pub fn cat(args: &[&str]) -> Result<(), String> { ... }
-Use your command in terminal/src/main.rs by importing it:
-use cat::cat;
-Commit & push your changes:
-git add .
-git commit -m "Implement cat command"
-git push origin your-branch
-
-
-
-🤝 Contribution Guidelines
-Always work in your own branch.
-
-Every command lives in its own library crate.
-
-Keep terminal/src/main.rs as the central loop for executing commands.
-
-
-🧾 License
-MIT License. Feel free to work, modify, and use your features.
-
-✨ Special Thanks
-Shoutout to @aminehabchi for initializing the project repo and leading the workspace setup.
+Thanks to [@aminehabchi](https://github.com/aminehabchi) for setting up the workspace and kicking off the project.
