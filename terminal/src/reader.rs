@@ -1,10 +1,11 @@
 use std::process::Command;
+use std::path::Path;
 use std::io::{ self, Write };
 use colored::*;
 use pwd::*;
 use crate::parser::parse_input;
 use crate::command_router::router;
-
+use crate::command_router::exit_message;
 const ASCII: &str =
     r#"
 _______         ______________  __________________ ______ 
@@ -22,11 +23,18 @@ pub fn main_loop() {
             return;
         }
     };
+    let current_directory = Path::new(current_dir.as_str());
 
     let mut input = String::new();
     println!("{}\n", ASCII.blue());
+
     loop {
-        print!("~{}{}$ ", current_dir.blue().bold(), get_current_branch());
+        if let Some(last_dir) = current_directory.file_name() {
+            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+        } else {
+            print!("/");
+        }
+
         io::stdout().flush().unwrap();
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
@@ -34,7 +42,7 @@ pub fn main_loop() {
         match bytes_read {
             Ok(0) => {
                 // Ctrl + D
-                println!("");
+                exit_message();
                 std::process::exit(0);
             }
             Ok(_) => {
@@ -42,7 +50,7 @@ pub fn main_loop() {
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                router(parse_input(trimmed_input.to_string()), &current_dir);
+                router(parse_input(trimmed_input.to_string()), &current_dir.to_string());
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -59,7 +67,7 @@ fn get_current_branch() -> String {
     match output {
         Ok(output) if output.status.success() => {
             let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!(" git:({})", branch.red().bold())
+            format!("git:({})", branch.red().bold())
         }
         _ => String::new(),
     }

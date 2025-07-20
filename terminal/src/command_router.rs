@@ -31,7 +31,7 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         }
         "cd" => {}
         "exit" => {
-            println!("terminal exited!");
+            exit_message();
             std::process::exit(0);
         }
         "clear" => {
@@ -56,4 +56,13 @@ pub fn clear_screen() {
     // Make sure to flush stdout so the escape code is sent immediately
     use std::io::{ stdout, Write };
     stdout().flush().unwrap();
+}
+use colored::Colorize;
+
+pub fn exit_message() {
+    println!("\n\n{}", "0-shell: Disengaging from the Matrix...\n".bold().bright_magenta());
+    println!(
+        "{}",
+        "Wake up, Neo. The terminal has closed.\n".bright_cyan().bold().underline()
+    );
 }
