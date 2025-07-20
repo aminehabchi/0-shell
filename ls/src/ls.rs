@@ -49,6 +49,7 @@ impl Ls {
             directorys,
         })
     }
+
     pub fn print(&self) {
         if !self.files.is_empty() {
             let mut dir: Directory = Directory {
@@ -59,26 +60,30 @@ impl Ls {
                 flags: self.flags.clone(),
                 is_files: true,
             };
+
             for file in &self.files {
                 dir.add_file_to_dir(&file);
             }
+
             dir.sort_files_by_name();
             dir.print();
-            if !self.directorys.is_empty() {
-                println!("\n");
-            }
+
+            println!("\n");
         }
 
         let l = self.directorys.len();
+
         for i in 0..l {
             if l > 1 {
                 if i != 0 {
-                    println!("\n");
+                    println!("");
                 }
                 println!("{}:", self.directorys[i].name);
             }
             self.directorys[i].print();
-            println!("");
+            if !self.flags.l || i != l - 1 {
+                println!("");
+            }
         }
     }
 }

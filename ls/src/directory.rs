@@ -111,15 +111,12 @@ impl Directory {
         if self.flags.l && !self.is_files {
             println!("total {}", self.total / 2);
         }
+        
         for i in 0..self.files.len() {
             self.files[i].print(&self.flags, &self.max_len);
             /********************/
-            if i != self.files.len() - 1 {
-                if self.flags.l {
-                    println!("");
-                } else {
-                    print!(" ");
-                }
+            if i != self.files.len() - 1 && !self.flags.l {
+                print!(" ");
             }
         }
     }

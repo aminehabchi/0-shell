@@ -195,6 +195,9 @@ dependencies = [
 [[package]]
 name = "rm"
 version = "0.1.0"
+dependencies = [
+ "pwd",
+]
 
 [[package]]
 name = "rustversion"

@@ -85,7 +85,7 @@ impl File {
             let date = format_date(&self.modified);
             let name = file_name(&self.name, &self.file_type, &flags);
 
-            print!(
+            println!(
                 "{}{} {} {} {} {} {} {}",
                 file_type,
                 mode,
