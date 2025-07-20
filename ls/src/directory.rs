@@ -38,8 +38,16 @@ impl Directory {
             self.add_file_to_dir("..");
         }
 
+        let dir = match fs::read_dir(&self.name) {
+            Ok(dir) => dir,
+            Err(err) => {
+                print!("Error reading directory {}: {}", self.name, err);
+                return;
+            }
+        };
+
         // Create a fresh path reference for the read_dir call
-        for entry_result in fs::read_dir(&self.name).unwrap() {
+        for entry_result in dir {
             let entry = match entry_result {
                 Ok(e) => e,
                 Err(err) => {
@@ -111,7 +119,7 @@ impl Directory {
         if self.flags.l && !self.is_files {
             println!("total {}", self.total / 2);
         }
-        
+
         for i in 0..self.files.len() {
             self.files[i].print(&self.flags, &self.max_len);
             /********************/

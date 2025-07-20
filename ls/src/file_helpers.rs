@@ -33,7 +33,12 @@ impl FileType {
         let file_type = metadata.file_type();
 
         if file_type.is_symlink() {
-            let target = fs::read_link(path).unwrap();
+            let target = match fs::read_link(path) {
+                Ok(target) => target,
+                Err(_) => {
+                    return FileType::File;
+                }
+            };
             FileType::Symlink(target)
         } else if file_type.is_dir() {
             FileType::Directory
