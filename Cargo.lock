@@ -7,6 +7,10 @@ name = "cat"
 version = "0.1.0"
 
 [[package]]
+name = "cd"
+version = "0.1.0"
+
+[[package]]
 name = "cp"
 version = "0.1.0"
 
@@ -39,6 +43,7 @@ name = "terminal"
 version = "0.1.0"
 dependencies = [
  "cat",
+ "cd",
  "cp",
  "echo",
  "ls",

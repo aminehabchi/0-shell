@@ -1,14 +1,16 @@
 use std::io::{ self, Write };
+use std::path::Path;
 use pwd::*;
 use mkdir::*;
 use rm::*;
 use mv::*;
 use cp::*;
 use echo::*;
+use cd::*;
 
 
 pub fn main_loop() {
-    let current_dir = match pwd() {
+    let mut current_dir : String = match pwd() {
         Ok(path) => path,
         Err(err) => {
             eprintln!("Failed to get current directory: {}", err);
@@ -34,7 +36,7 @@ pub fn main_loop() {
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                select_command(trimmed_input.to_string(), &current_dir);
+                select_command(trimmed_input.to_string(), &mut current_dir);
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -44,7 +46,7 @@ pub fn main_loop() {
     }
 }
 
-fn select_command(input: String, current_dir: &str) {
+fn select_command(input: String, current_dir: &mut String) {
     let args: Vec<&str> = input.split(" ").collect();
     match args[0] {
         "pwd" => print_output("pwd", pwd()),
@@ -54,7 +56,12 @@ fn select_command(input: String, current_dir: &str) {
         "mkdir" => mkdir(current_dir, &args[1..]),
         "mv" => { mv(&args[1..]) }
         "cp" => { cp(&args[1..]) }
-        "cd" => {}
+        "cd" => {
+            let (is_valid,content) = visit_dir(Path::new(current_dir),&args[1]);
+            if is_valid {
+                *current_dir = content;
+            }
+        },
         "exit" => {
             println!("terminal exited!");
             std::process::exit(0);
