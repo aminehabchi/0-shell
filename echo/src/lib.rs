@@ -1,7 +1,7 @@
-pub fn process_escape_sequences(input: &str) -> String {
+pub fn echo(input: Vec<&str>) -> String {
     let mut result = String::new();
-    let mut chars = input.chars().peekable();
-    
+    for item in input {
+        let mut chars = item.chars().peekable(); 
     while let Some(ch) = chars.next() {
         if ch == '\\' {
             if let Some(&next_ch) = chars.peek() {
@@ -30,8 +30,8 @@ pub fn process_escape_sequences(input: &str) -> String {
         } else {
             result.push(ch);
         }
+        }
     }
-    
     result
 }
 

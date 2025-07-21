@@ -24,7 +24,8 @@ pub fn main_loop() {
             return;
         }
     };
-    let current_directory = Path::new(current_dir.as_str());
+    let mut binding = current_dir.clone();
+    let mut current_directory = Path::new(binding.as_str());
 
     let mut input = String::new();
    
@@ -62,7 +63,9 @@ pub fn main_loop() {
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                router(parse_input(trimmed_input.to_string()), &current_dir.to_string());
+                router(parse_input(trimmed_input.to_string()), &mut current_dir);
+                binding = current_dir.clone();
+                current_directory = Path::new(binding.as_str());
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);

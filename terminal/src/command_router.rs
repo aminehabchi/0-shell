@@ -1,14 +1,16 @@
 use pwd::*;
 use cat::*;
+use std::path::Path;
 use mkdir::*;
 use rm::*;
 use mv::*;
 use cp::*;
+use cd::*;
 use ls::*;
 use echo::*;
 use std::io::{ Write };
  use std::io;
-pub fn router(parts: Vec<String>, current_dir: &String) {
+pub fn router(parts: Vec<String>, current_dir: &mut String) {
     if parts.is_empty() {
         return;
     }
@@ -22,7 +24,7 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "pwd" => print_output("pwd", pwd()),
         "ls" => ls(&args),
 
-        "echo" => echo(&args),
+        "echo" => println!("{}",echo(args)),
         "rm" => rm(&args),
         "mkdir" => mkdir(&current_dir, &args),
         "mv" => {
@@ -32,7 +34,13 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "cp" => {
             cp(&args);
         }
-        "cd" => {}
+        "cd" => {
+            let (is_valid,content) = visit_dir(Path::new(current_dir),&args[0]);
+            if is_valid {
+                println!("content : {}",content);
+                *current_dir = content;
+            }
+        }
         "exit" => {
             exit_message();
             std::process::exit(0);
