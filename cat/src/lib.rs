@@ -64,7 +64,6 @@ pub fn cat(args: &[&str]) {
 
     for file in input_files {
         if file == "-" {
-    
             let stdin = io::stdin();
             let mut line = String::new();
             while stdin.read_line(&mut line).unwrap_or(0) > 0 {
@@ -72,7 +71,6 @@ pub fn cat(args: &[&str]) {
                     eprintln!("cat: write error: {}", e);
                     return;
                 }
-                //line.clear();
             }
             continue;
         }

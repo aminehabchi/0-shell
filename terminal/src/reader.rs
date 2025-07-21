@@ -5,6 +5,7 @@ use colored::*;
 use pwd::*;
 use crate::parser::parse_input;
 use crate::command_router::router;
+use atty::Stream;
 use crate::command_router::exit_message;
 const ASCII: &str =
     r#"
@@ -26,16 +27,27 @@ pub fn main_loop() {
     let current_directory = Path::new(current_dir.as_str());
 
     let mut input = String::new();
-    println!("{}\n", ASCII.blue());
+   
 
+    let is_tty = atty::is(Stream::Stdout);
+     if is_tty {
+        println!("{}\n", ASCII.blue());
+    }
     loop {
+      
         if let Some(last_dir) = current_directory.file_name() {
             print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
         } else {
             print!("/");
         }
-
-        io::stdout().flush().unwrap();
+       
+        match io::stdout().flush() {
+            Ok(_) => {},
+            Err(r) =>{
+                print!("{r}");
+                return
+            } ,
+        };
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
 

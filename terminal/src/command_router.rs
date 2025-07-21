@@ -5,7 +5,8 @@ use mv::*;
 use cp::*;
 use ls::*;
 use echo::*;
-
+use std::io::{ Write };
+ use std::io;
 pub fn router(parts: Vec<String>, current_dir: &String) {
     if parts.is_empty() {
         return;
@@ -54,8 +55,14 @@ pub fn clear_screen() {
     // ANSI escape code to clear screen and move cursor to top-left
     print!("\x1B[2J\x1B[1;1H");
     // Make sure to flush stdout so the escape code is sent immediately
-    use std::io::{ stdout, Write };
-    stdout().flush().unwrap();
+  
+    match io::stdout().flush() {
+            Ok(_) => {},
+            Err(r) =>{
+                print!("{r}");
+                return
+            } ,
+        };
 }
 use colored::Colorize;
 

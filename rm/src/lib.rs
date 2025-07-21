@@ -1,4 +1,4 @@
-use pwd::*;
+
 use std::fs;
 use std::path::Path;
 pub fn rm(args: &[&str]) {
@@ -34,36 +34,25 @@ pub fn rm(args: &[&str]) {
     }
 
     for file in files {
-        let mut ispwd = false;
-        if file == "." {
-            ispwd = true;
-        } else if file == ".." {
-            let _ = fs::remove_dir_all(Path::new(".."));
+        if file == "." || file ==".." {
+            eprintln!(
+           "rm: \x1b[31mfailed to remove directory\x1b[0m '{}'",
+             file,
+            );
             continue;
-        }
+        } 
+        
         let path = Path::new(file);
         if recursive {
             if path.is_dir() {
-                let pwd = match pwd() {
-                    Ok(p) => p,
-                    Err(_) => "".to_string(),
-                };
-                if ispwd {
-                    if let Err(e) = fs::remove_dir_all(Path::new(&pwd)) {
-                        eprintln!(
-                            "rm: \x1b[31mfailed to remove directory\x1b[0m '{}': {}",
-                            file,
-                            e
-                        );
-                    }
-                } else {
+    
                     if let Err(e) = fs::remove_dir_all(path) {
                         eprintln!(
                             "rm: \x1b[31mfailed to remove directory\x1b[0m '{}': {}",
                             file,
                             e
                         );
-                    }
+                    
                 }
             } else if let Err(e) = fs::remove_file(path) {
                 eprintln!("rm: \x1b[31mfailed to remove file\x1b[0m '{}': {}", file, e);
