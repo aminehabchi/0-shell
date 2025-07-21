@@ -1,13 +1,20 @@
-use std::io::{ self, Write };
+use std::process::Command;
 use std::path::Path;
+use std::io::{ self, Write };
+use colored::*;
 use pwd::*;
-use mkdir::*;
-use rm::*;
-use mv::*;
-use cp::*;
-use echo::*;
-use cd::*;
-
+use crate::parser::parse_input;
+use crate::command_router::router;
+use atty::Stream;
+use crate::command_router::exit_message;
+const ASCII: &str =
+    r#"
+_______         ______________  __________________ ______ 
+__  __ \        __  ___/___  / / /___  ____/___  / ___  / 
+_  / / /_____________ \ __  /_/ / __  __/   __  /  __  /  
+/ /_/ / _/_____/____/ / _  __  /  _  /___   _  /____  /___
+\____/          /____/  /_/ /_/   /_____/   /_____//_____/
+                                                          "#;
 
 pub fn main_loop() {
     let mut current_dir : String = match pwd() {
@@ -17,26 +24,45 @@ pub fn main_loop() {
             return;
         }
     };
+    let current_directory = Path::new(current_dir.as_str());
 
     let mut input = String::new();
+   
 
+    let is_tty = atty::is(Stream::Stdout);
+     if is_tty {
+        println!("{}\n", ASCII.blue());
+    }
     loop {
-        print!("{}$ ", current_dir);
-        io::stdout().flush().unwrap();
+      
+        if let Some(last_dir) = current_directory.file_name() {
+            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+        } else {
+            print!("/");
+        }
+       
+        match io::stdout().flush() {
+            Ok(_) => {},
+            Err(r) =>{
+                print!("{r}");
+                return
+            } ,
+        };
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
 
         match bytes_read {
             Ok(0) => {
-                println!("");
-                break;
+                // Ctrl + D
+                exit_message();
+                std::process::exit(0);
             }
             Ok(_) => {
                 let trimmed_input = input.trim();
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                select_command(trimmed_input.to_string(), &mut current_dir);
+                router(parse_input(trimmed_input.to_string()), &current_dir.to_string());
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -46,35 +72,15 @@ pub fn main_loop() {
     }
 }
 
-fn select_command(input: String, current_dir: &mut String) {
-    let args: Vec<&str> = input.split(" ").collect();
-    match args[0] {
-        "pwd" => print_output("pwd", pwd()),
-        "ls" => {},
-        "echo" => println!("{}",process_escape_sequences(&args[1][1..args[1].len()-1])),
-        "rm" => rm(&args[1..]),
-        "mkdir" => mkdir(current_dir, &args[1..]),
-        "mv" => { mv(&args[1..]) }
-        "cp" => { cp(&args[1..]) }
-        "cd" => {
-            let (is_valid,content) = visit_dir(Path::new(current_dir),&args[1]);
-            if is_valid {
-                *current_dir = content;
-            }
-        },
-        "exit" => {
-            println!("terminal exited!");
-            std::process::exit(0);
-        }
-        _ => {
-            println!("Command '{}' not found", args[0]);
-        }
-    }
-}
+fn get_current_branch() -> String {
+    // return String::new();
+    let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
 
-fn print_output(command: &str, result: Result<String, String>) {
-    match result {
-        Ok(out) => println!("{}", out),
-        Err(err) => println!("{}: {}", command, err),
+    match output {
+        Ok(output) if output.status.success() => {
+            let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            format!("git:({})", branch.red().bold())
+        }
+        _ => String::new(),
     }
 }
