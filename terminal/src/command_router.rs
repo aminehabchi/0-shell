@@ -1,4 +1,5 @@
 use pwd::*;
+use cat::*;
 use mkdir::*;
 use rm::*;
 use mv::*;
@@ -26,7 +27,8 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "mkdir" => mkdir(&current_dir, &args),
         "mv" => {
             mv(&args);
-        }
+        },
+        "cat" => cat(&args),
         "cp" => {
             cp(&args);
         }

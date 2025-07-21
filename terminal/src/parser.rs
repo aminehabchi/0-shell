@@ -59,7 +59,7 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
                 return;
             }
         }
-        new_input.push('\n');
+        //new_input.push('\n');
         split_input(new_input, parts, open_quote);
     }
 }

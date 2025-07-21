@@ -3,8 +3,11 @@ use std::io::{self, Read, Write};
 
 pub fn cat(args: &[&str]) {
     if args.is_empty() {
-        eprintln!("cat: \x1b[31mmissing file operand\x1b[0m");
-        return;
+         let mut buffer = String::new();
+        if let Err(e) = io::stdin().read_to_string(&mut buffer) {
+            eprintln!("cat: \x1b[31merror reading stdin\x1b[0m: {}", e);
+            return;
+        }
     }
 
     let mut input_files = Vec::new();
@@ -63,7 +66,7 @@ pub fn cat(args: &[&str]) {
     }
 
     for file in input_files {
-        if file == "-" {
+        if file == "-"  || file == "--" {
             let stdin = io::stdin();
             let mut line = String::new();
             while stdin.read_line(&mut line).unwrap_or(0) > 0 {
