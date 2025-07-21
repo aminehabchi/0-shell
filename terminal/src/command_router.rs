@@ -37,7 +37,6 @@ pub fn router(parts: Vec<String>, current_dir: &mut String) {
         "cd" => {
             let (is_valid,content) = visit_dir(Path::new(current_dir),&args[0]);
             if is_valid {
-                println!("content : {}",content);
                 *current_dir = content;
             }
         }
