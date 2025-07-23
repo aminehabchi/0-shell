@@ -29,6 +29,7 @@ let mut input = String::new();
         current_dir = match pwd() {
             Ok(path) => path,
             Err(_) => {
+                // handling cd ..
                 let mut d: Vec<&str> = current_dir.split("/").collect();
                 d.pop();
                 let cc = d.join("/");
@@ -36,12 +37,12 @@ let mut input = String::new();
                     Ok(new_dir) => current_dir = new_dir,
                     Err(_) => {
                         current_dir = cc;
-                        //println!("cd: {}", e);
                     }
                 }
                 continue;
             }
         };
+        // for git branches if exists
         let  binding = current_dir.clone();
         let  current_directory = Path::new(binding.as_str());
         if let Some(last_dir) = current_directory.file_name() {
@@ -53,7 +54,7 @@ let mut input = String::new();
         } else {
             print!("/");
         }
-
+        // forcing print
         match io::stdout().flush() {
             Ok(_) => {}
             Err(r) => {

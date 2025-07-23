@@ -5,5 +5,6 @@ mod parser;
 mod command_router;
 
 fn main() {
+    // run main loop
     main_loop();
 }
