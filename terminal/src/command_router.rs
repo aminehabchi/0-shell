@@ -4,11 +4,12 @@ use mkdir::*;
 use rm::*;
 use mv::*;
 use cp::*;
+use cd::*;
 use ls::*;
 use echo::*;
 use std::io::{ Write };
  use std::io;
-pub fn router(parts: Vec<String>, current_dir: &String) {
+pub fn router(parts: Vec<String>, current_dir: &mut String) {
     if parts.is_empty() {
         return;
     }
@@ -22,7 +23,7 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "pwd" => print_output("pwd", pwd()),
         "ls" => ls(&args),
 
-        "echo" => echo(&args),
+        "echo" => println!("{}",echo(args)),
         "rm" => rm(&args),
         "mkdir" => mkdir(&current_dir, &args),
         "mv" => {
@@ -32,7 +33,16 @@ pub fn router(parts: Vec<String>, current_dir: &String) {
         "cp" => {
             cp(&args);
         }
-        "cd" => {}
+        "cd" => {
+            if args.is_empty() {
+                println!("cd: missing operand");
+            } else {
+                match cd(current_dir, args[0]) {
+                    Ok(new_dir) => *current_dir = new_dir,
+                    Err(e) => {println!("cd: {}", e)}
+                }
+            }
+        }
         "exit" => {
             exit_message();
             std::process::exit(0);

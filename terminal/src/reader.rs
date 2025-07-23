@@ -3,6 +3,7 @@ use std::path::Path;
 use std::io::{ self, Write };
 use colored::*;
 use pwd::*;
+use cd::*;
 use crate::parser::parse_input;
 use crate::command_router::router;
 use atty::Stream;
@@ -17,36 +18,48 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
                                                           "#;
 
 pub fn main_loop() {
-    let current_dir = match pwd() {
-        Ok(path) => path,
-        Err(err) => {
-            eprintln!("Failed to get current directory: {}", err);
-            return;
-        }
-    };
-    let current_directory = Path::new(current_dir.as_str());
-
     let mut input = String::new();
-   
 
     let is_tty = atty::is(Stream::Stdout);
-     if is_tty {
+    if is_tty {
         println!("{}\n", ASCII.blue());
     }
+    let mut current_dir: String = "".to_string();
     loop {
-      
+        current_dir = match pwd() {
+            Ok(path) => path,
+            Err(_) => {
+                let mut d: Vec<&str> = current_dir.split("/").collect();
+                d.pop();
+                let cc = d.join("/");
+                match cd(&current_dir, &cc) {
+                    Ok(new_dir) => current_dir = new_dir,
+                    Err(_) => {
+                        current_dir = cc;
+                        //println!("cd: {}", e);
+                    }
+                }
+                continue;
+            }
+        };
+        let mut binding = current_dir.clone();
+        let mut current_directory = Path::new(binding.as_str());
         if let Some(last_dir) = current_directory.file_name() {
-            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+            print!(
+                "~ {} {}$ ",
+                last_dir.to_string_lossy().blue().bold(),
+                get_current_branch()
+            );
         } else {
             print!("/");
         }
-       
+
         match io::stdout().flush() {
-            Ok(_) => {},
-            Err(r) =>{
+            Ok(_) => {}
+            Err(r) => {
                 print!("{r}");
-                return
-            } ,
+                return;
+            }
         };
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
@@ -62,7 +75,9 @@ pub fn main_loop() {
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                router(parse_input(trimmed_input.to_string()), &current_dir.to_string());
+                router(parse_input(trimmed_input.to_string()), &mut current_dir);
+                binding = current_dir.clone();
+                current_directory = Path::new(binding.as_str());
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -71,6 +86,7 @@ pub fn main_loop() {
         }
     }
 }
+
 
 fn get_current_branch() -> String {
     // return String::new();
