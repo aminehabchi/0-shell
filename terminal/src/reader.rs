@@ -1,8 +1,6 @@
-use crate::command_router::exit_message;
-use crate::command_router::router;
-use crate::parser::parse_input;
-use atty::Stream;
-use cd::*;
+use std::process::Command;
+use std::path::Path;
+use std::io::{ self, Write };
 use colored::*;
 use pwd::*;
 use cd::*;
@@ -12,8 +10,6 @@ use atty::Stream;
 use crate::command_router::exit_message;
 const ASCII: &str =
     r#"
-
->>>>>>> abouchik
 _______         ______________  __________________ ______ 
 __  __ \        __  ___/___  / / /___  ____/___  / ___  / 
 _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /  
@@ -21,8 +17,8 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
 \____/          /____/  /_/ /_/   /_____/   /_____//_____/
                                                           "#;
 
-pub fn main_loop() {
-    let mut input = String::new();
+ pub fn main_loop() {
+let mut input = String::new();
 
     let is_tty = atty::is(Stream::Stdout);
     if is_tty {
@@ -46,8 +42,8 @@ pub fn main_loop() {
                 continue;
             }
         };
-        let mut binding = current_dir.clone();
-        let mut current_directory = Path::new(binding.as_str());
+        let  binding = current_dir.clone();
+        let  current_directory = Path::new(binding.as_str());
         if let Some(last_dir) = current_directory.file_name() {
             print!(
                 "~ {} {}$ ",
@@ -79,9 +75,7 @@ pub fn main_loop() {
                 if trimmed_input.is_empty() {
                     continue;
                 }
-                router(parse_input(trimmed_input.to_string()), &mut current_dir);
-                binding = current_dir.clone();
-                current_directory = Path::new(binding.as_str());
+                router(parse_input(trimmed_input.to_string()), &mut current_dir.to_string());
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -91,18 +85,19 @@ pub fn main_loop() {
     }
 }
 
-
 fn get_current_branch() -> String {
     // return String::new();
-    let output = Command::new("git")
-        .args(&["rev-parse", "--abbrev-ref", "HEAD"])
-        .output();
+    let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
 
     match output {
         Ok(output) if output.status.success() => {
             let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!("{}{}{}","git:(".yellow().bold(),branch.red().bold(),")".yellow().bold())
+            format!("git:({})", branch.red().bold())
         }
         _ => String::new(),
     }
 }
+
+
+
+
