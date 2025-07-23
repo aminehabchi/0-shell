@@ -37,7 +37,6 @@ pub fn echo(input: Vec<&str>) -> String {
         }
 
     }
-    println!("{}",result.len());
     result
 }
 
