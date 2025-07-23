@@ -1,6 +1,6 @@
 pub fn echo(input: Vec<&str>) -> String {
     let mut result = String::new();
-    for item in input {
+    for (i,item) in input.iter().enumerate() {
         let mut chars = item.chars().peekable(); 
     while let Some(ch) = chars.next() {
         if ch == '\\' {
@@ -31,7 +31,13 @@ pub fn echo(input: Vec<&str>) -> String {
             result.push(ch);
         }
         }
+        if i < input.len()-1{
+
+            result.push(' ');
+        }
+
     }
+    println!("{}",result.len());
     result
 }
 

@@ -1,6 +1,5 @@
 use pwd::*;
 use cat::*;
-use std::path::Path;
 use mkdir::*;
 use rm::*;
 use mv::*;
@@ -35,9 +34,13 @@ pub fn router(parts: Vec<String>, current_dir: &mut String) {
             cp(&args);
         }
         "cd" => {
-            let (is_valid,content) = visit_dir(Path::new(current_dir),&args[0]);
-            if is_valid {
-                *current_dir = content;
+            if args.is_empty() {
+                println!("cd: missing operand");
+            } else {
+                match cd(current_dir, args[0]) {
+                    Ok(new_dir) => *current_dir = new_dir,
+                    Err(e) => {println!("cd: {}", e)}
+                }
             }
         }
         "exit" => {

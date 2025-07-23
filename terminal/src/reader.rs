@@ -1,14 +1,15 @@
-use std::process::Command;
-use std::path::Path;
-use std::io::{ self, Write };
+use crate::command_router::exit_message;
+use crate::command_router::router;
+use crate::parser::parse_input;
+use atty::Stream;
+use cd::*;
 use colored::*;
 use pwd::*;
-use crate::parser::parse_input;
-use crate::command_router::router;
-use atty::Stream;
-use crate::command_router::exit_message;
-const ASCII: &str =
-    r#"
+use std::io::{self, Write};
+use std::path::Path;
+use std::process::Command;
+
+const ASCII: &str = r#"
 _______         ______________  __________________ ______ 
 __  __ \        __  ___/___  / / /___  ____/___  / ___  / 
 _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /  
@@ -17,37 +18,48 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
                                                           "#;
 
 pub fn main_loop() {
-    let mut current_dir : String = match pwd() {
-        Ok(path) => path,
-        Err(err) => {
-            eprintln!("Failed to get current directory: {}", err);
-            return;
-        }
-    };
-    let mut binding = current_dir.clone();
-    let mut current_directory = Path::new(binding.as_str());
-
     let mut input = String::new();
-   
 
     let is_tty = atty::is(Stream::Stdout);
-     if is_tty {
+    if is_tty {
         println!("{}\n", ASCII.blue());
     }
+    let mut current_dir: String = "".to_string();
     loop {
-      
+        current_dir = match pwd() {
+            Ok(path) => path,
+            Err(_) => {
+                let mut d: Vec<&str> = current_dir.split("/").collect();
+                d.pop();
+                let cc = d.join("/");
+                match cd(&current_dir, &cc) {
+                    Ok(new_dir) => current_dir = new_dir,
+                    Err(_) => {
+                        current_dir = cc;
+                        //println!("cd: {}", e);
+                    }
+                }
+                continue;
+            }
+        };
+        let mut binding = current_dir.clone();
+        let mut current_directory = Path::new(binding.as_str());
         if let Some(last_dir) = current_directory.file_name() {
-            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+            print!(
+                "~ {} {}$ ",
+                last_dir.to_string_lossy().blue().bold(),
+                get_current_branch()
+            );
         } else {
             print!("/");
         }
-       
+
         match io::stdout().flush() {
-            Ok(_) => {},
-            Err(r) =>{
+            Ok(_) => {}
+            Err(r) => {
                 print!("{r}");
-                return
-            } ,
+                return;
+            }
         };
         input.clear();
         let bytes_read = io::stdin().read_line(&mut input);
@@ -77,7 +89,9 @@ pub fn main_loop() {
 
 fn get_current_branch() -> String {
     // return String::new();
-    let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
+    let output = Command::new("git")
+        .args(&["rev-parse", "--abbrev-ref", "HEAD"])
+        .output();
 
     match output {
         Ok(output) if output.status.success() => {
