@@ -1,4 +1,4 @@
-USAGE 
+USAGE <br>
 cat [FILE]...
 ```bash
 ***Display*** single file contents
