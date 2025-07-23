@@ -62,6 +62,7 @@ pub fn rm(args: &[&str]) {
                 eprintln!("rm: \x1b[31mcan't remove '{}': is a directory (use -r)\x1b[0m", file);
             } else if let Err(e) = fs::remove_file(path) {
                 eprintln!("rm: \x1b[31mfailed to remove\x1b[0m '{}': {}", file, e);
+                
             }
         }
     }

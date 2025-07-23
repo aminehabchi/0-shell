@@ -13,5 +13,6 @@ echo = { path = "../echo" }
 rm = { path = "../rm" }
 mv = { path = "../mv" }
 cp = { path = "../cp" }
+cd = { path = "../cd" }
 colored = "2.0"
 atty = "0.2"

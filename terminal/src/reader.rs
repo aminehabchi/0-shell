@@ -1,6 +1,8 @@
-use std::process::Command;
-use std::path::Path;
-use std::io::{ self, Write };
+use crate::command_router::exit_message;
+use crate::command_router::router;
+use crate::parser::parse_input;
+use atty::Stream;
+use cd::*;
 use colored::*;
 use pwd::*;
 use cd::*;
@@ -10,6 +12,8 @@ use atty::Stream;
 use crate::command_router::exit_message;
 const ASCII: &str =
     r#"
+
+>>>>>>> abouchik
 _______         ______________  __________________ ______ 
 __  __ \        __  ___/___  / / /___  ____/___  / ___  / 
 _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /  
@@ -90,7 +94,9 @@ pub fn main_loop() {
 
 fn get_current_branch() -> String {
     // return String::new();
-    let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
+    let output = Command::new("git")
+        .args(&["rev-parse", "--abbrev-ref", "HEAD"])
+        .output();
 
     match output {
         Ok(output) if output.status.success() => {
