@@ -79,7 +79,7 @@ fn get_current_branch() -> String {
     match output {
         Ok(output) if output.status.success() => {
             let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!("git:({})", branch.red().bold())
+            format!("{}{}{}","git:(".yellow().bold(),branch.red().bold(),")".yellow().bold())
         }
         _ => String::new(),
     }
