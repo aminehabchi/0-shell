@@ -7,16 +7,16 @@ A minimalist Unix-like shell built in **Rust** — no `bash`, no `sh`, just pure
 **0-Shell** is a lightweight, standalone shell inspired by tools like **BusyBox**, built for embedded Linux environments. It uses **Rust** to implement core shell commands **from scratch**, without relying on external programs.
 
 ![Alt text](./Screenshot.png)
+
 ---
 
-## What You'll Build
+## What We Built
 A fully working shell that:
 - Displays an intelligent prompt: `$ [branch] ~/current/path`
 - Features **colored output** similar to `zsh` with syntax highlighting
 - Accepts and parses complex user input with **advanced input parsing**
 - Executes built-in commands with proper argument handling
 - Handles errors gracefully with informative messages
-- Supports command chaining and redirection
 - Exits on `exit` or `Ctrl+D`
 
 ---
@@ -28,7 +28,6 @@ A fully working shell that:
 - **Colored output**: Syntax highlighting for commands, files, and directories
 - **Zsh-like experience**: Modern shell aesthetics with intuitive color coding
 - **Error highlighting**: Clear visual feedback for invalid commands
-
 
 ### **System Integration**
 - **Git awareness**: Displays current branch in prompt
@@ -60,10 +59,12 @@ A fully working shell that:
 | `rm`    | Remove files or directories (`-r` flag)  | Safe deletion with confirmation |
 | `mv`    | Move or rename files                     | Smart conflict resolution |
 | `mkdir` | Create directories                       | Recursive creation with `-p` |
+| `clear` | Clear the terminal screen                | Complete screen refresh |
 | `exit`  | Exit the shell                           | Graceful cleanup and goodbye message |
 
 ---
 
+## Getting Started
 
 ### Clone the Repository
 ```bash
@@ -72,13 +73,13 @@ cd 0-shell
 cargo run -p terminal
 ```
 
+---
 
 ## Team Members & Responsibilities
 | Name                  | Assigned Commands           | Additional Responsibilities |
 |-----------------------|-----------------------------|----------------------------|
 | **Ali Louhab**        | `cat`, `rm`, `exit`, `mkdir` | Error handling, file operations |
 | **Amine Habchi**      | `mv`, `cp`, `pwd`, `ls`     | **Input parsing**, **prompt system**, colors |
-| **Abdelouahab Bouchik** | `cd`, `echo` , `clear`     | Terminal control, Git integration |
+| **Abdelouahab Bouchik** | `cd`, `echo`, `clear`      | Terminal control, Git integration |
 
 ---
-
