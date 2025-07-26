@@ -5,9 +5,9 @@ use colored::*;
 use pwd::*;
 use cd::*;
 use crate::parser::parse_input;
-use crate::command_router::router;
+use crate::command_router::{ router, exit_message };
 use atty::Stream;
-use crate::command_router::exit_message;
+
 const ASCII: &str =
     r#"
 _______         ______________  __________________ ______ 
@@ -17,66 +17,61 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
 \____/          /____/  /_/ /_/   /_____/   /_____//_____/
                                                           "#;
 
- pub fn main_loop() {
-let mut input = String::new();
-
-    let is_tty = atty::is(Stream::Stdout);
-    if is_tty {
+pub fn main_loop() {
+    // Print ASCII art if stdout is a terminal
+    if atty::is(Stream::Stdout) {
         println!("{}\n", ASCII.blue());
     }
-    let mut current_dir: String = "".to_string();
+
+    let mut current_dir = String::new();
+    let stdin = io::stdin();
+    let stdout = io::stdout();
+
     loop {
+        // Get current working directory or fallback logic on error (e.g. after cd ..)
         current_dir = match pwd() {
             Ok(path) => path,
             Err(_) => {
-                // handling cd ..
-                let mut d: Vec<&str> = current_dir.split("/").collect();
-                d.pop();
-                let cc = d.join("/");
-                match cd(&current_dir, &cc) {
-                    Ok(new_dir) => current_dir = new_dir,
-                    Err(_) => {
-                        current_dir = cc;
-                    }
-                }
-                continue;
-            }
-        };
-        // for git branches if exists
-        let  binding = current_dir.clone();
-        let  current_directory = Path::new(binding.as_str());
-        if let Some(last_dir) = current_directory.file_name() {
-            print!(
-                "~ {} {}$ ",
-                last_dir.to_string_lossy().blue().bold(),
-                get_current_branch()
-            );
-        } else {
-            print!("/");
-        }
-        // forcing print
-        match io::stdout().flush() {
-            Ok(_) => {}
-            Err(r) => {
-                print!("{r}");
-                return;
-            }
-        };
-        input.clear();
-        let bytes_read = io::stdin().read_line(&mut input);
+                // Try to go one directory up
+                let mut parts: Vec<&str> = current_dir.split('/').collect();
+                parts.pop();
+                let parent = parts.join("/");
 
-        match bytes_read {
+                match cd(&current_dir, &parent) {
+                    Ok(new_dir) => new_dir,
+                    Err(_) => parent,
+                }
+            }
+        };
+
+        // Prepare prompt: directory name + git branch if any
+        let current_path = Path::new(&current_dir);
+        if let Some(last_dir) = current_path.file_name() {
+            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+        } else {
+            print!("/ ");
+        }
+
+        // Flush stdout to show prompt immediately
+        if let Err(e) = stdout.lock().flush() {
+            eprintln!("Failed to flush stdout: {}", e);
+            return;
+        }
+
+        // Read input line
+        let mut input = String::new();
+        match stdin.read_line(&mut input) {
             Ok(0) => {
-                // Ctrl + D
+                // Ctrl+D pressed — exit gracefully
                 exit_message();
                 std::process::exit(0);
             }
             Ok(_) => {
-                let trimmed_input = input.trim();
-                if trimmed_input.is_empty() {
+                let trimmed = input.trim();
+                if trimmed.is_empty() {
                     continue;
                 }
-                router(parse_input(trimmed_input.to_string()), &mut current_dir.to_string());
+                router(parse_input(trimmed.to_string()), &mut current_dir);
             }
             Err(err) => {
                 eprintln!("Error reading input: {}", err);
@@ -87,18 +82,17 @@ let mut input = String::new();
 }
 
 fn get_current_branch() -> String {
-    // return String::new();
     let output = Command::new("git").args(&["rev-parse", "--abbrev-ref", "HEAD"]).output();
 
     match output {
-        Ok(output) if output.status.success() => {
-            let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!("git:({})", branch.red().bold())
+        Ok(out) if out.status.success() => {
+            let branch = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if branch.is_empty() {
+                String::new()
+            } else {
+                format!("git:({})", branch.red().bold())
+            }
         }
         _ => String::new(),
     }
 }
-
-
-
-

@@ -1,12 +1,11 @@
-use crate::file::File;
 use colored::*;
 use users::{ get_user_by_uid, get_group_by_gid };
 use std::process::Command;
 use std::fs;
 use std::os::unix::fs::*;
-use std::path::*;
-
 use crate::helpers::*;
+
+use std::path::*;
 
 #[derive(PartialEq, Debug)]
 pub enum FileType {
@@ -127,13 +126,11 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
 
         FileType::Symlink(target) => {
             if flags.l {
-                let fake_flag = flags.clone();
-                let t = File::new(target.as_path(), &fake_flag);
-                format!(
-                    "{} -> {}",
-                    quoted_name.cyan(),
-                    file_name(&t.name, &t.file_type, &fake_flag)
-                )
+                let target_path = match fs::read_link(&target) {
+                    Ok(raw_target) => raw_target,
+                    Err(_) => target.clone(),
+                };
+                format!("{} -> {}", quoted_name.cyan(), target_path.display())
             } else if flags.f_upper {
                 format!("{}@", quoted_name.cyan())
             } else {
@@ -151,7 +148,7 @@ pub fn file_name(name: &str, file_type: &FileType, flags: &Flag) -> String {
 
         FileType::CharDevice | FileType::BlockDevice => quoted_name.yellow().bold().to_string(),
 
-        FileType::NamedPipe => format!("{}`", quoted_name),
+        FileType::NamedPipe => format!("{}|", quoted_name),
 
         FileType::Socket => format!("{}=", quoted_name),
 

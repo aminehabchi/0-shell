@@ -1,7 +1,5 @@
 use std::path::Path;
 use std::fs;
-use std::os::unix::fs::MetadataExt;
-//
 use crate::file::File;
 use crate::helpers::*;
 use crate::file_helpers::FileType;
@@ -9,7 +7,6 @@ use crate::file_helpers::FileType;
 #[derive(Debug, Default)]
 pub struct Directory {
     pub name: String,
-    pub total: u64,
     pub files: Vec<File>,
     pub max_len: ((u8, u8, u8), u8, u8, u8),
     pub flags: Flag,
@@ -20,7 +17,6 @@ impl Directory {
     pub fn new(name: &str, flags: &Flag) -> Result<Directory, String> {
         Ok(Directory {
             name: name.to_string(),
-            total: 0,
             files: vec![],
             max_len: ((0, 0, 0), 0, 0, 0),
             flags: flags.clone(),
@@ -28,7 +24,6 @@ impl Directory {
         })
     }
     pub fn fill_directory(&mut self) {
-        // Check if directory first, without holding a reference
         if !Path::new(&self.name).is_dir() {
             return;
         }
@@ -46,7 +41,6 @@ impl Directory {
             }
         };
 
-        // Create a fresh path reference for the read_dir call
         for entry_result in dir {
             let entry = match entry_result {
                 Ok(e) => e,
@@ -71,12 +65,6 @@ impl Directory {
 
     pub fn add_file_to_dir(&mut self, entry_path: &str) {
         let file = File::new(entry_path, &self.flags);
-
-        if self.flags.l {
-            if let Ok(metadata) = fs::symlink_metadata(entry_path) {
-                self.total += metadata.blocks();
-            }
-        }
 
         if file.file_type == FileType::CharDevice || file.file_type == FileType::BlockDevice {
             let major_len = file.major.to_string().len() as u8;
@@ -117,7 +105,7 @@ impl Directory {
 
     pub fn print(&self) {
         if self.flags.l && !self.is_files {
-            println!("total {}", self.total / 2);
+            println!("total {}", calculate_ls_total(self.name.clone(), self.flags.a));
         }
 
         for i in 0..self.files.len() {

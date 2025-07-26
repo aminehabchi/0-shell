@@ -54,7 +54,6 @@ impl Ls {
         if !self.files.is_empty() {
             let mut dir: Directory = Directory {
                 name: "".to_string(),
-                total: 0,
                 files: vec![],
                 max_len: ((0, 0, 0), 0, 0, 0),
                 flags: self.flags.clone(),

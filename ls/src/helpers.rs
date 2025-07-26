@@ -3,6 +3,11 @@ use std::path::*;
 use chrono::{ DateTime, Duration, Local, Utc };
 use std::time::{ SystemTime };
 
+use std::ffi::CString;
+use std::fs;
+use std::os::unix::ffi::OsStrExt;
+use libc::{ lstat, stat as stat_t };
+
 #[derive(Debug, Default, Clone)]
 pub struct Flag {
     pub a: bool,
@@ -51,4 +56,64 @@ pub fn remove_special_char(name: &str) -> String {
     let name = name.strip_prefix('.').unwrap_or(name).to_string();
     // remove from name -.
     name
+}
+
+pub fn calculate_ls_total<P: AsRef<Path>>(dir_path: P, include_hidden: bool) -> u64 {
+    let mut total_blocks = 0;
+    let dir_path_ref = dir_path.as_ref();
+
+    if include_hidden {
+        for special in &[".", ".."] {
+            let special_path = if *special == "." {
+                dir_path_ref.to_path_buf()
+            } else {
+                dir_path_ref.join("..")
+            };
+
+            if let Ok(c_path) = CString::new(special_path.as_os_str().as_bytes()) {
+                let mut stat_buf: stat_t = unsafe { std::mem::zeroed() };
+                if (unsafe { lstat(c_path.as_ptr(), &mut stat_buf) }) == 0 {
+                    total_blocks += ((stat_buf.st_blocks as u64) + 1) / 2;
+                }
+            }
+        }
+    }
+
+    let entries = match fs::read_dir(dir_path_ref) {
+        Ok(entries) => entries,
+        Err(e) => {
+            eprintln!("Failed to read directory: {}", e);
+            return total_blocks;
+        }
+    };
+
+    for entry in entries {
+        if let Ok(entry) = entry {
+            let path = entry.path();
+
+            if !include_hidden {
+                if let Some(name) = path.file_name().and_then(|s| s.to_str()) {
+                    if name.starts_with('.') {
+                        continue;
+                    }
+                }
+            }
+
+            let c_path = match CString::new(path.as_os_str().as_bytes()) {
+                Ok(cstr) => cstr,
+                Err(_) => {
+                    continue;
+                }
+            };
+
+            let mut stat_buf: stat_t = unsafe { std::mem::zeroed() };
+            let result = unsafe { lstat(c_path.as_ptr(), &mut stat_buf) };
+
+            if result == 0 {
+                total_blocks += ((stat_buf.st_blocks as u64) + 1) / 2;
+            }
+        }
+    }
+
+    total_blocks
 }
