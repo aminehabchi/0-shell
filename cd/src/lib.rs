@@ -3,8 +3,26 @@ use std::path::{ PathBuf};
 
 pub fn cd(current_dir: &str, target: &str) -> Result<String, String> {
     let basep = PathBuf::from(current_dir);
-    let new_path = basep.join(target).canonicalize();
-
+    let resolved_target = if target == "~" || target.starts_with("~/") {
+        match env::var("HOME") {
+            Ok(home) => {
+                if target == "~" {
+                    home
+                } else {
+                    target.replacen("~", &home, 1)
+                }
+            }
+            Err(_) => return Err("Could not determine home directory".to_string()),
+        }
+    } else {
+        target.to_string()
+    };
+    
+    let new_path = if PathBuf::from(&resolved_target).is_absolute() {
+        PathBuf::from(&resolved_target).canonicalize()
+    } else {
+        basep.join(&resolved_target).canonicalize()
+    };
     match new_path {
         Ok(path) => {
             if path.is_dir() {
