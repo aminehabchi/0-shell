@@ -1,4 +1,4 @@
-use std::{io::{ self, Write }};
+use std::{ io::{ self, Write } };
 
 pub fn parse_input(input: String) -> Vec<String> {
     let mut parts: Vec<String> = vec![String::new()];
@@ -37,29 +37,39 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
         }
     }
 
+    if open_quote == None {
+        if let Some(last_char) = input.chars().last() {
+            if last_char == '\\' {
+                open_quote = Some('z');
+            }
+        }
+    }
+
     if let Some(quote) = open_quote {
         if quote == '"' {
             print!("dquote> ");
-        } else {
+        } else if quote == '"' {
             print!("quote> ");
+        } else {
+            print!("> ");
+            open_quote = None;
         }
 
         match io::stdout().flush() {
-            Ok(_) => {},
-            Err(r) =>{
+            Ok(_) => {}
+            Err(r) => {
                 print!("{r}");
-                return
-            } ,
-        };
+                return;
+            }
+        }
         let mut new_input = String::new();
         match io::stdin().read_line(&mut new_input) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(r) => {
                 println!("{r}");
                 return;
             }
         }
-        //new_input.push('\n');
         split_input(new_input, parts, open_quote);
     }
 }

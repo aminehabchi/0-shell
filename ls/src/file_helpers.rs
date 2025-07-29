@@ -1,6 +1,5 @@
 use colored::*;
 use users::{ get_user_by_uid, get_group_by_gid };
-use std::process::Command;
 use std::fs;
 use std::os::unix::fs::*;
 use crate::helpers::*;
@@ -168,25 +167,16 @@ pub fn gid_to_groupname(gid: u32) -> String {
         .unwrap_or(gid.to_string())
 }
 
+use xattr;
 pub fn check_acl(path: &str) -> bool {
-    let output = Command::new("getfacl").arg(path).output().expect("failed to execute getfacl");
-
-    if !output.status.success() {
-        return false;
+    if let Ok(attrs) = xattr::list(path) {
+        for attr in attrs {
+            if attr == "system.posix_acl_access" || attr == "system.posix_acl_default" {
+                return true;
+            }
+        }
     }
-
-    let acl_text = String::from_utf8_lossy(&output.stdout);
-
-    // Basic entries that always appear
-    let basic_entries = ["user::", "group::", "other::"];
-
-    // If any line does NOT start with these, it indicates extended ACL
-    acl_text.lines().any(|line| {
-        !basic_entries.iter().any(|prefix| line.starts_with(prefix)) &&
-            !line.trim().is_empty() &&
-            !line.starts_with('#') && // skip comments
-            !line.starts_with("mask::") // mask is also standard in ACLs
-    })
+    false
 }
 
 pub fn mode_to_string(mode: &u32, path: &str, file_type: &FileType) -> String {
