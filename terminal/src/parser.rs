@@ -1,4 +1,4 @@
-use std::{ io::{ self, Write } };
+use std::io::{ self, Write };
 
 pub fn parse_input(input: String) -> Vec<String> {
     let mut parts: Vec<String> = vec![String::new()];
@@ -10,30 +10,42 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
     if parts.is_empty() {
         parts.push(String::new());
     }
+    let mut escape = false;
+    let mut chars = input.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if escape {
+            parts.last_mut().unwrap().push(ch);
+            escape = false;
+            continue;
+        }
 
-    for ch in input.chars() {
-        match open_quote {
-            Some(quote) => {
-                if ch == quote {
-                    open_quote = None;
-                } else {
-                    parts.last_mut().unwrap().push(ch);
+        match ch {
+            '\\' => {
+                if chars.peek().is_some() {
+                    escape = true;
                 }
             }
-            None =>
-                match ch {
-                    '\'' | '"' => {
-                        open_quote = Some(ch);
-                    }
-                    ' ' | '\t' => {
-                        if !parts.last().unwrap().is_empty() {
-                            parts.push(String::new());
-                        }
-                    }
-                    _ => {
+            '\'' | '"' => {
+                if open_quote.is_some() {
+                    if open_quote.unwrap() == ch {
+                        open_quote = None;
+                    } else {
                         parts.last_mut().unwrap().push(ch);
                     }
+                } else {
+                    open_quote = Some(ch);
                 }
+            }
+            ' ' | '\t' => {
+                if open_quote.is_some() {
+                    parts.last_mut().unwrap().push(ch);
+                } else if !parts.last().unwrap().is_empty() {
+                    parts.push(String::new());
+                }
+            }
+            _ => {
+                parts.last_mut().unwrap().push(ch);
+            }
         }
     }
 
@@ -47,29 +59,20 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
 
     if let Some(quote) = open_quote {
         if quote == '"' {
+            parts.last_mut().unwrap().push('\n');
             print!("dquote> ");
-        } else if quote == '"' {
+        } else if quote == '\'' {
+            parts.last_mut().unwrap().push('\n');
             print!("quote> ");
         } else {
             print!("> ");
             open_quote = None;
         }
 
-        match io::stdout().flush() {
-            Ok(_) => {}
-            Err(r) => {
-                print!("{r}");
-                return;
-            }
-        }
+        io::stdout().flush().unwrap();
         let mut new_input = String::new();
-        match io::stdin().read_line(&mut new_input) {
-            Ok(_) => {}
-            Err(r) => {
-                println!("{r}");
-                return;
-            }
+        if io::stdin().read_line(&mut new_input).is_ok() {
+            split_input(new_input, parts, open_quote);
         }
-        split_input(new_input, parts, open_quote);
     }
 }
