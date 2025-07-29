@@ -1,21 +1,35 @@
 pub fn echo(input: Vec<&str>) -> String {
+
     let mut result = String::new();
     for (i,item) in input.iter().enumerate() {
-        let mut chars = item.chars().peekable(); 
-    while let Some(ch) = chars.next() {
-        if ch == '\\' {
-            if let Some(&next_ch) = chars.peek() {
-                match next_ch {
+        let mut chars = item.chars().peekable();
+        while let Some(ch) = chars.next() {
+            //println!("{}",ch);
+            if ch == '\\' {
+                if let Some(&next_ch) = chars.peek() {
+                    match next_ch {
                     'n' => {
-                        result.push('\n');
+                        if item.len() > 2 {
+                            result.push('\n');
+                        } else {
+                            result.push('n');
+                        }
                         chars.next();
                     }
                     't' => {
-                        result.push('\t');
+                        if item.len() > 2 {
+                            result.push('\t'); 
+                        } else {
+                            result.push('t');
+                        }
                         chars.next();
                     }
                     'r' => {
-                        result.push('\r');
+                        if item.len() > 2 {
+                            result.push('\r'); 
+                        } else {
+                            result.push('r');
+                        }
                         chars.next();
                     }
                     '\\' => {
@@ -24,20 +38,18 @@ pub fn echo(input: Vec<&str>) -> String {
                     }
                     _ => result.push(ch),
                 }
+                } else {
+                    result.push(ch);
+                }
             } else {
                 result.push(ch);
             }
-        } else {
-            result.push(ch);
-        }
         }
         if i < input.len()-1{
-
             result.push(' ');
         }
-
+        
     }
-    println!("{}",result.len());
     result
 }
 
