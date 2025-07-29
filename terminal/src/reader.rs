@@ -19,10 +19,10 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
 
 pub fn main_loop() {
     // Print ASCII art if stdout is a terminal
-    if atty::is(Stream::Stdout) {
-        println!("{}\n", ASCII.blue());
+    if !atty::is(Stream::Stdout) {
+       return;
     }
-
+     println!("{}\n", ASCII.blue());
     let mut current_dir = String::new();
     let stdin = io::stdin();
     let stdout = io::stdout();
