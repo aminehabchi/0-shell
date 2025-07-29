@@ -34,14 +34,14 @@ pub fn router(parts: Vec<String>, current_dir: &mut String) {
             cp(&args);
         }
         "cd" => {
-            if args.is_empty() {
-                println!("cd: missing operand");
-            } else {
-                match cd(current_dir, args[0]) {
-                    Ok(new_dir) => *current_dir = new_dir,
-                    Err(e) => {println!("cd: {}", e)}
-                }
-            }
+            let mut target : Option<&str> = None;
+            if !args.is_empty() {
+                target = Some(args[0]);
+            } 
+            match cd(current_dir, target) {
+                Ok(new_dir) => *current_dir = new_dir,
+                Err(e) => {println!("cd: {}", e)}
+            } 
         }
         "exit" => {
             exit_message();

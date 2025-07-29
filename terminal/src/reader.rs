@@ -37,7 +37,7 @@ pub fn main_loop() {
                 parts.pop();
                 let parent = parts.join("/");
 
-                match cd(&current_dir, &parent) {
+                match cd(&current_dir, Some(&parent)) {
                     Ok(new_dir) => new_dir,
                     Err(_) => parent,
                 }
