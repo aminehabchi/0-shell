@@ -51,6 +51,10 @@ impl Ls {
     }
 
     pub fn print(&self) {
+        if self.directorys.is_empty() && self.files.is_empty() {
+            return;
+        }
+
         if !self.files.is_empty() {
             let mut dir: Directory = Directory {
                 name: "".to_string(),
@@ -66,11 +70,16 @@ impl Ls {
 
             dir.sort_files_by_name();
             dir.print();
-
-            println!("\n");
         }
 
         let l = self.directorys.len();
+
+        if !self.directorys.is_empty() && !self.files.is_empty() {
+            println!("\n");
+        } else if self.directorys.is_empty() {
+            println!("");
+            return;
+        }
 
         for i in 0..l {
             if l > 1 {
