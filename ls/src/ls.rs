@@ -59,7 +59,7 @@ impl Ls {
             let mut dir: Directory = Directory {
                 name: "".to_string(),
                 files: vec![],
-                max_len: ((0, 0, 0), 0, 0, 0,false),
+                max_len: ((0, 0, 0), 0, 0, 0, false),
                 flags: self.flags.clone(),
                 is_files: true,
             };
@@ -77,7 +77,9 @@ impl Ls {
         if !self.directorys.is_empty() && !self.files.is_empty() {
             println!("\n");
         } else if self.directorys.is_empty() {
-            println!("");
+            if !self.flags.l {
+                println!("");
+            }
             return;
         }
 
