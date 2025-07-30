@@ -66,10 +66,15 @@ impl File {
         file
     }
 
-    pub fn print(&self, flags: &Flag, max_len: &((u8, u8, u8), u8, u8, u8)) {
+    pub fn print(&self, flags: &Flag, max_len: &((u8, u8, u8), u8, u8, u8, bool)) {
         if flags.l {
             let file_type = file_type(&self.file_type);
-            let mode = mode_to_string(&self.permissions, &self.path.to_string_lossy(),&self.file_type);
+            let mode = mode_to_string(
+                &self.permissions,
+                &self.path.to_string_lossy(),
+                &self.file_type,
+                max_len.4
+            );
 
             let hard_link = format!("{:width$}", self.nlink, width = max_len.1 as usize);
 

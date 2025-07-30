@@ -2,11 +2,20 @@ use std::io::{ self, Write };
 
 pub fn parse_input(input: String) -> Vec<String> {
     let mut parts: Vec<String> = vec![String::new()];
-    split_input(input, &mut parts, None);
+    let mut is_newline = false;
+    split_input(input, &mut parts, None, &mut is_newline);
+    if is_newline {
+        parts.last_mut().unwrap().pop();
+    }
     parts
 }
 
-pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Option<char>) {
+pub fn split_input(
+    input: String,
+    parts: &mut Vec<String>,
+    mut open_quote: Option<char>,
+    is_newline: &mut bool
+) {
     if parts.is_empty() {
         parts.push(String::new());
     }
@@ -49,30 +58,32 @@ pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Optio
         }
     }
 
-    if open_quote == None {
-        if let Some(last_char) = input.chars().last() {
-            if last_char == '\\' {
-                open_quote = Some('z');
-            }
+    let mut is = false;
+    if let Some(last_char) = input.chars().last() {
+        if last_char == '\\' {
+            is = true;
         }
     }
 
-    if let Some(quote) = open_quote {
-        if quote == '"' {
-            parts.last_mut().unwrap().push('\n');
-            print!("dquote> ");
-        } else if quote == '\'' {
-            parts.last_mut().unwrap().push('\n');
-            print!("quote> ");
+    if open_quote.is_some() || is {
+        if let Some(quote) = open_quote && !is {
+            if quote == '"' {
+                print!("dquote> ");
+            } else if quote == '\'' {
+                print!("quote> ");
+            }
         } else {
             print!("> ");
-            open_quote = None;
+        }
+        if !is {
+            parts.last_mut().unwrap().push('\n');
         }
 
+        *is_newline = true;
         io::stdout().flush().unwrap();
         let mut new_input = String::new();
         if io::stdin().read_line(&mut new_input).is_ok() {
-            split_input(new_input, parts, open_quote);
+            split_input(new_input, parts, open_quote, is_newline);
         }
     }
 }

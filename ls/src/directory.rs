@@ -3,12 +3,13 @@ use std::fs;
 use crate::file::File;
 use crate::helpers::*;
 use crate::file_helpers::FileType;
+use crate::file_helpers::check_acl;
 //
 #[derive(Debug, Default)]
 pub struct Directory {
     pub name: String,
     pub files: Vec<File>,
-    pub max_len: ((u8, u8, u8), u8, u8, u8),
+    pub max_len: ((u8, u8, u8), u8, u8, u8, bool),
     pub flags: Flag,
     pub is_files: bool,
 }
@@ -18,7 +19,7 @@ impl Directory {
         Ok(Directory {
             name: name.to_string(),
             files: vec![],
-            max_len: ((0, 0, 0), 0, 0, 0),
+            max_len: ((0, 0, 0), 0, 0, 0, false),
             flags: flags.clone(),
             is_files: false,
         })
@@ -98,6 +99,10 @@ impl Directory {
         let group_name_len = file.gid.to_string().len() as u8;
         if group_name_len > self.max_len.3 {
             self.max_len.3 = group_name_len;
+        }
+
+        if check_acl(entry_path) {
+            self.max_len.4 = true;
         }
 
         self.files.push(file);

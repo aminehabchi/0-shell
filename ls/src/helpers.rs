@@ -32,15 +32,18 @@ pub fn format_date(time: &Option<SystemTime>) -> String {
         Some(t) => {
             let datetime_utc: DateTime<Utc> = t.into();
 
-            let now = Utc::now();
+            // Add one hour to the time
+            let adjusted = datetime_utc + Duration::hours(1);
 
+            let now = Utc::now();
             let diff = now.signed_duration_since(datetime_utc);
 
+            // Use the adjusted time for formatting
+            let local = adjusted.with_timezone(&Local);
+
             if diff > Duration::days(365) {
-                let local = datetime_utc.with_timezone(&Local);
                 local.format("%b %d  %Y").to_string()
             } else {
-                let local = datetime_utc.with_timezone(&Local);
                 local.format("%b %d %H:%M").to_string()
             }
         }

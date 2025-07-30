@@ -179,7 +179,7 @@ pub fn check_acl(path: &str) -> bool {
     false
 }
 
-pub fn mode_to_string(mode: &u32, path: &str, file_type: &FileType) -> String {
+pub fn mode_to_string(mode: &u32, path: &str, file_type: &FileType, is: bool) -> String {
     let mut result = String::new();
 
     let permissions = [(mode >> 6) & 0o7, (mode >> 3) & 0o7, mode & 0o7];
@@ -196,11 +196,12 @@ pub fn mode_to_string(mode: &u32, path: &str, file_type: &FileType) -> String {
         }
         _ => {}
     }
-
-    if check_acl(path) {
-        result.push('+');
-    } else {
-        result.push(' ');
+    if is {
+        if check_acl(path) {
+            result.push('+');
+        } else {
+            result.push(' ');
+        }
     }
 
     result
