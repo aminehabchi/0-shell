@@ -33,16 +33,13 @@ pub fn router(parts: Vec<String>, current_dir: &mut String) {
         "cp" => {
             cp(&args);
         }
-        "cd" => {
-            let mut target : Option<&str> = None;
-            if !args.is_empty() {
-                target = Some(args[0]);
-            } 
+           "cd" => {
+            let target = if args.is_empty() { "" } else { args[0] };
             match cd(current_dir, target) {
                 Ok(new_dir) => *current_dir = new_dir,
-                Err(e) => {println!("cd: {}", e)}
-            } 
-        }
+                Err(e) => println!("cd: {}", e),
+            }
+        },
         "exit" => {
             exit_message();
             std::process::exit(0);

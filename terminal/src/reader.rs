@@ -4,6 +4,8 @@ use std::io::{ self, Write };
 use colored::*;
 use pwd::*;
 use cd::*;
+use colored;
+use std::env;
 use crate::parser::parse_input;
 use crate::command_router::{ router, exit_message };
 use atty::Stream;
@@ -37,21 +39,27 @@ pub fn main_loop() {
                 parts.pop();
                 let parent = parts.join("/");
 
-                match cd(&current_dir, Some(&parent)) {
+                match cd(&current_dir, &parent) {
                     Ok(new_dir) => new_dir,
                     Err(_) => parent,
                 }
             }
         };
 
-        // Prepare prompt: directory name + git branch if any
+         // Prepare prompt: directory name + git branch if any
         let current_path = Path::new(&current_dir);
         if let Some(last_dir) = current_path.file_name() {
+             let home = env::var("HOME").map_err(|_| "HOME not set".to_string())
+                .unwrap_or_else(|_| String::from("/"));
+            if current_dir == home {
+                print!("{}","~$ ".blue());
+              
+            }else {
             print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+            }
         } else {
             print!("/ ");
         }
-
         // Flush stdout to show prompt immediately
         if let Err(e) = stdout.lock().flush() {
             eprintln!("Failed to flush stdout: {}", e);
