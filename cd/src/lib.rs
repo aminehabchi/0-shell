@@ -47,6 +47,7 @@ pub fn cd(current_dir: &str, target: &str) -> Result<String, String> {
             }
         }
         Err(_) => {
+   
                 Err(format!("no previous directory or no such directory named : {}", target))
             
         } ,

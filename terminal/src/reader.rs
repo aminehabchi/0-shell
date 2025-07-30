@@ -56,6 +56,7 @@ pub fn main_loop() {
               
             }else {
             print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
+
             }
         } else {
             print!("/ ");

@@ -33,7 +33,7 @@ pub fn router(parts: Vec<String>, current_dir: &mut String) {
         "cp" => {
             cp(&args);
         }
-           "cd" => {
+             "cd" => {
             let target = if args.is_empty() { "" } else { args[0] };
             match cd(current_dir, target) {
                 Ok(new_dir) => *current_dir = new_dir,
