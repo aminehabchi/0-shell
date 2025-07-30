@@ -1,42 +1,54 @@
 use std::env;
-use std::path::{ PathBuf};
- 
-pub fn cd(current_dir: &str, target: Option<&str>) -> Result<String, String> {
-    let basep = PathBuf::from(current_dir);
-    let original_target = match target {
-        Some(tar) => tar,
-        None => ""
-    };
-    
-    let resolved_target = if original_target == "~" || original_target.starts_with("~/") {
-        match env::var("HOME") {
-            Ok(home) => {
-                if original_target == "~" {
-                    home
+use std::path::PathBuf;
+
+// Static mutable variable for previous directory
+static mut PREV_DIR: Option<String> = None;
+
+pub fn cd(current_dir: &str, target: &str) -> Result<String, String> {
+    // Handle "cd -" → go to previous directory
+    if target == "-" {
+        unsafe {
+            if let Some(ref prev) = PREV_DIR {
+                let path = PathBuf::from(prev);
+                if path.is_dir() {
+                    // Save current as previous before switching
+                    PREV_DIR = Some(current_dir.to_string());
+                    env::set_current_dir(&path).map_err(|e| e.to_string())?;
+                    return Ok(path.display().to_string());
                 } else {
-                    original_target.replacen("~", &home, 1)
+                    return Err("previous path is not a directory".to_string());
                 }
+            } else {
+                PREV_DIR = Some(current_dir.to_string())
             }
-            Err(_) => return Err("Could not determine home directory".to_string()),
         }
+    }
+
+    // Handle "cd" and "cd ~" → go to $HOME
+    let new_path = if target.is_empty() || target == "~" {
+        let home = env::var("HOME").map_err(|_| "HOME not set".to_string())?;
+        PathBuf::from(home)
     } else {
-        original_target.to_string()
+        PathBuf::from(current_dir).join(target)
     };
-    
-    let new_path = if PathBuf::from(&resolved_target).is_absolute() {
-        PathBuf::from(&resolved_target).canonicalize()
-    } else {
-        basep.join(&resolved_target).canonicalize()
-    };
-    match new_path {
+
+    let canonical = new_path.canonicalize();
+
+    match canonical {
         Ok(path) => {
             if path.is_dir() {
+                unsafe {
+                    PREV_DIR = Some(current_dir.to_string());
+                }
                 env::set_current_dir(&path).map_err(|e| e.to_string())?;
                 Ok(path.display().to_string())
             } else {
-                Err(format!("not a directory: {}", original_target))
+                Err(format!("not a directory: {}", target))
             }
         }
-        Err(_) => Err(format!("no such directory: {}", original_target)),
+        Err(_) => {
+                Err(format!("no previous directory or no such directory named : {}", target))
+            
+        } ,
     }
 }
