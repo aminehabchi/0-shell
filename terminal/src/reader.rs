@@ -39,10 +39,11 @@ pub fn main_loop() {
                 parts.pop();
                 let parent = parts.join("/");
 
-                match cd(&current_dir, &parent) {
+                current_dir = match cd(&current_dir, &parent) {
                     Ok(new_dir) => new_dir,
                     Err(_) => parent,
-                }
+                };
+                continue;
             }
         };
 

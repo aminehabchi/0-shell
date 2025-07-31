@@ -19,21 +19,9 @@ pub fn split_input(
     if parts.is_empty() {
         parts.push(String::new());
     }
-    let mut escape = false;
     let mut chars = input.chars().peekable();
     while let Some(ch) = chars.next() {
-        if escape {
-            parts.last_mut().unwrap().push(ch);
-            escape = false;
-            continue;
-        }
-
         match ch {
-            '\\' => {
-                if chars.peek().is_some() {
-                    escape = true;
-                }
-            }
             '\'' | '"' => {
                 if open_quote.is_some() {
                     if open_quote.unwrap() == ch {
