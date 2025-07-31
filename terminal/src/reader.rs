@@ -22,9 +22,9 @@ _  / / /_____________ \ __  /_/ / __  __/   __  /  __  /
 pub fn main_loop() {
     // Print ASCII art if stdout is a terminal
     if !atty::is(Stream::Stdout) {
-       return;
+        return;
     }
-     println!("{}\n", ASCII.blue());
+    println!("{}\n", ASCII.blue());
     let mut current_dir = String::new();
     let stdin = io::stdin();
     let stdout = io::stdout();
@@ -47,17 +47,17 @@ pub fn main_loop() {
             }
         };
 
-         // Prepare prompt: directory name + git branch if any
+        // Prepare prompt: directory name + git branch if any
         let current_path = Path::new(&current_dir);
         if let Some(last_dir) = current_path.file_name() {
-             let home = env::var("HOME").map_err(|_| "HOME not set".to_string())
+            let home = env
+                ::var("HOME")
+                .map_err(|_| "HOME not set".to_string())
                 .unwrap_or_else(|_| String::from("/"));
             if current_dir == home {
-                print!("{}","~$ ".blue());
-              
-            }else {
-            print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
-
+                print!("{}", "~$ ".blue());
+            } else {
+                print!("~ {} {}$ ", last_dir.to_string_lossy().blue().bold(), get_current_branch());
             }
         } else {
             print!("/ ");
