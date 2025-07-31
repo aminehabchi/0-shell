@@ -2,20 +2,11 @@ use std::io::{ self, Write };
 
 pub fn parse_input(input: String) -> Vec<String> {
     let mut parts: Vec<String> = vec![String::new()];
-    let mut is_newline = false;
-    split_input(input, &mut parts, None, &mut is_newline);
-    if is_newline {
-        parts.last_mut().unwrap().pop();
-    }
+    split_input(input, &mut parts, None);
     parts
 }
 
-pub fn split_input(
-    input: String,
-    parts: &mut Vec<String>,
-    mut open_quote: Option<char>,
-    is_newline: &mut bool
-) {
+pub fn split_input(input: String, parts: &mut Vec<String>, mut open_quote: Option<char>) {
     if parts.is_empty() {
         parts.push(String::new());
     }
@@ -65,12 +56,11 @@ pub fn split_input(
             print!("> ");
         }
 
-        *is_newline = true;
         io::stdout().flush().unwrap();
         let mut new_input = String::new();
         if io::stdin().read_line(&mut new_input).is_ok() {
             let trimed = new_input.trim().to_string();
-            split_input(trimed, parts, open_quote, is_newline);
+            split_input(trimed, parts, open_quote);
         }
     }
 }
