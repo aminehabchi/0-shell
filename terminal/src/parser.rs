@@ -72,18 +72,17 @@ pub fn split_input(
             } else if quote == '\'' {
                 print!("quote> ");
             }
+            parts.last_mut().unwrap().push('\n');
         } else {
             print!("> ");
-        }
-        if !is {
-            parts.last_mut().unwrap().push('\n');
         }
 
         *is_newline = true;
         io::stdout().flush().unwrap();
         let mut new_input = String::new();
         if io::stdin().read_line(&mut new_input).is_ok() {
-            split_input(new_input, parts, open_quote, is_newline);
+            let trimed = new_input.trim().to_string();
+            split_input(trimed, parts, open_quote, is_newline);
         }
     }
 }
